@@ -1,0 +1,188 @@
+"use strict";
+/**
+ * 书籍封面获取服务
+ * 用于处理用户导入书籍的封面获取
+ */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isUserImportedBook = isUserImportedBook;
+exports.searchBookCover = searchBookCover;
+exports.searchBookCoverByISBN = searchBookCoverByISBN;
+exports.getBookCoverUrl = getBookCoverUrl;
+exports.generateDefaultCoverSVG = generateDefaultCoverSVG;
+const axios_1 = __importDefault(require("axios"));
+const cover_1 = require("./cover");
+const image_upload_1 = require("./image-upload");
+/**
+ * 检测是否为用户导入的书籍（通过封面URL判断）
+ */
+function isUserImportedBook(coverUrl) {
+    if (!coverUrl)
+        return false;
+    return coverUrl.includes("res.weread.qq.com/wrepub") && coverUrl.includes("_parsecover");
+}
+/**
+ * 通过书名和作者搜索书籍封面
+ * 使用 Open Library API（免费、公开的书籍数据库）
+ */
+function searchBookCover(title, author) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            console.log(`搜索书籍封面: 《${title}》 作者: ${author}`);
+            // 构建搜索查询
+            const queryParts = [title];
+            if (author && author.trim()) {
+                queryParts.push(author);
+            }
+            const query = queryParts.join(" ");
+            // URL编码
+            const encodedQuery = encodeURIComponent(query);
+            // 使用 Open Library Search API
+            const searchUrl = `https://openlibrary.org/search.json?q=${encodedQuery}&limit=5&fields=cover_i,key,title,author_name`;
+            const response = yield axios_1.default.get(searchUrl, {
+                timeout: 10000, // 增加超时时间到10秒
+                headers: {
+                    "User-Agent": "weread-to-notion/1.0 (contact@example.com)",
+                },
+            });
+            if (response.data && response.data.docs && response.data.docs.length > 0) {
+                // 找到匹配的书籍
+                const book = response.data.docs[0];
+                if (book.cover_i) {
+                    // Open Library 的封面ID，构造不同尺寸的URL
+                    const coverUrl = `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`;
+                    console.log(`找到封面: ${coverUrl}`);
+                    return coverUrl;
+                }
+            }
+            console.log("未找到匹配的封面");
+            return null;
+        }
+        catch (error) {
+            if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+                console.warn(`搜索封面超时: ${title}`);
+            }
+            else {
+                console.error(`搜索封面失败:`, error.message);
+            }
+            return null;
+        }
+    });
+}
+/**
+ * 通过 ISBN 搜索书籍封面
+ * 如果书籍有 ISBN，搜索成功率更高
+ */
+function searchBookCoverByISBN(isbn) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (!isbn || isbn.trim() === "") {
+                return null;
+            }
+            console.log(`通过 ISBN 搜索封面: ${isbn}`);
+            const searchUrl = `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`;
+            const response = yield axios_1.default.get(searchUrl, {
+                timeout: 10000, // 增加超时时间到10秒
+                headers: {
+                    "User-Agent": "weread-to-notion/1.0 (contact@example.com)",
+                },
+            });
+            const key = `ISBN:${isbn}`;
+            if (response.data && response.data[key] && response.data[key].cover) {
+                const coverUrl = response.data[key].cover.large ||
+                    response.data[key].cover.medium ||
+                    response.data[key].cover.small;
+                if (coverUrl) {
+                    console.log(`通过 ISBN 找到封面: ${coverUrl}`);
+                    return coverUrl;
+                }
+            }
+            console.log("通过 ISBN 未找到封面");
+            return null;
+        }
+        catch (error) {
+            if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+                console.warn(`通过 ISBN 搜索封面超时: ${isbn}`);
+            }
+            else {
+                console.error(`通过 ISBN 搜索封面失败:`, error.message);
+            }
+            return null;
+        }
+    });
+}
+/**
+ * 获取书籍封面URL
+ * 优先使用原有封面，如果不可用则尝试搜索或下载上传
+ */
+function getBookCoverUrl(originalCoverUrl, bookTitle, bookAuthor, bookIsbn, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // 首先检查原有封面是否可用
+        const normalizedUrl = (0, cover_1.normalizeCoverUrl)(originalCoverUrl);
+        if (normalizedUrl) {
+            // 如果不是用户导入的书籍，直接返回原有封面
+            if (!isUserImportedBook(originalCoverUrl)) {
+                return normalizedUrl;
+            }
+            console.log(`《${bookTitle}》是用户导入书籍，处理中...`);
+            // 方案1: 如果启用了图片上传，尝试下载并上传到图床
+            if ((options === null || options === void 0 ? void 0 : options.useImageUpload) && (options === null || options === void 0 ? void 0 : options.wereadCookie)) {
+                console.log("尝试下载并上传封面...");
+                const uploadedUrl = yield (0, image_upload_1.processImportedBookCover)(originalCoverUrl, bookTitle, {
+                    wereadCookie: options.wereadCookie,
+                    imgurClientId: options.imgurClientId,
+                    githubToken: options.githubToken,
+                    githubRepository: options.githubRepository,
+                });
+                if (uploadedUrl) {
+                    return uploadedUrl;
+                }
+            }
+            // 方案2: 尝试通过 Open Library 搜索封面
+            console.log("尝试通过 Open Library 搜索封面...");
+            // 如果有 ISBN，优先使用 ISBN 搜索
+            if (bookIsbn && bookIsbn.trim()) {
+                const isbnCover = yield searchBookCoverByISBN(bookIsbn);
+                if (isbnCover) {
+                    return isbnCover;
+                }
+            }
+            // 使用书名和作者搜索
+            const titleAuthorCover = yield searchBookCover(bookTitle, bookAuthor);
+            if (titleAuthorCover) {
+                return titleAuthorCover;
+            }
+        }
+        // 如果都失败了，返回空字符串
+        console.warn(`无法为《${bookTitle}》获取封面`);
+        return "";
+    });
+}
+/**
+ * 生成默认书籍封面 SVG
+ * 这是一个简单的书籍图标 SVG，可以转换为图片URL
+ * 注意：Notion 可能不支持 SVG 作为封面图片
+ */
+function generateDefaultCoverSVG(title, author) {
+    const truncatedTitle = title.length > 20 ? title.substring(0, 20) + "..." : title;
+    const truncatedAuthor = author.length > 15 ? author.substring(0, 15) + "..." : author;
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="400" fill="#4A90E2"/>
+  <rect x="20" y="50" width="260" height="300" rx="5" fill="white" opacity="0.9"/>
+  <text x="150" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#333">${truncatedTitle}</text>
+  <text x="150" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">${truncatedAuthor}</text>
+  <text x="150" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#999">本地导入书籍</text>
+</svg>`;
+}
