@@ -4,7 +4,6 @@
  */
 
 import axios from "axios";
-import { WEREAD_BASE_URL } from "../config/constants";
 import { normalizeCoverUrl } from "./cover";
 
 /**

@@ -25,7 +25,7 @@ exports.deleteNotionBlocks = deleteNotionBlocks;
 const axios_1 = __importDefault(require("axios"));
 const constants_1 = require("../../config/constants");
 const http_1 = require("../../utils/http");
-const cover_1 = require("../../utils/cover");
+const cover_fetch_1 = require("../../utils/cover-fetch");
 /**
  * 检查Notion数据库是否包含所有必要的属性字段
  * @param apiKey Notion API密钥
@@ -150,6 +150,7 @@ function writeBookToNotion(apiKey, databaseId, bookData) {
             const headers = (0, http_1.getNotionHeaders)(apiKey, constants_1.NOTION_VERSION);
             // 从bookData中提取译者信息 (通常不在基本元数据中，可能需要单独处理)
             const translator = bookData.translator || "";
+            const coverUrl = yield (0, cover_fetch_1.getBookCoverUrl)(bookData.cover, bookData.title, bookData.author || "未知作者", bookData.isbn);
             // 构建要写入的数据
             const data = {
                 parent: {
@@ -188,23 +189,6 @@ function writeBookToNotion(apiKey, databaseId, bookData) {
                                 },
                             },
                         ],
-                    },
-                    封面: {
-                        files: (() => {
-                            const normalizedCoverUrl = (0, cover_1.normalizeCoverUrl)(bookData.cover);
-                            if (!normalizedCoverUrl) {
-                                return [];
-                            }
-                            return [
-                                {
-                                    type: "external",
-                                    name: `${bookData.title}-封面`,
-                                    external: {
-                                        url: normalizedCoverUrl,
-                                    },
-                                },
-                            ];
-                        })(),
                     },
                     // ISBN是rich_text类型
                     ISBN: {
@@ -289,6 +273,20 @@ function writeBookToNotion(apiKey, databaseId, bookData) {
                     },
                 },
             };
+            // 添加封面属性（如果有封面URL）
+            if (coverUrl) {
+                data.properties.封面 = {
+                    files: [
+                        {
+                            type: "external",
+                            name: `${bookData.title}-封面`,
+                            external: {
+                                url: coverUrl,
+                            },
+                        },
+                    ],
+                };
+            }
             // 发送请求创建页面
             const response = yield axios_1.default.post(`${constants_1.NOTION_API_BASE_URL}/pages`, data, {
                 headers,
@@ -318,7 +316,7 @@ function updateBookInNotion(apiKey, pageId, bookData) {
             console.log(`\n更新书籍《${bookData.title}》的属性...`);
             const headers = (0, http_1.getNotionHeaders)(apiKey, constants_1.NOTION_VERSION);
             const translator = bookData.translator || "";
-            const normalizedCoverUrl = (0, cover_1.normalizeCoverUrl)(bookData.cover);
+            const coverUrl = yield (0, cover_fetch_1.getBookCoverUrl)(bookData.cover, bookData.title, bookData.author || "未知作者", bookData.isbn);
             const properties = {
                 书名: {
                     title: [
@@ -424,14 +422,14 @@ function updateBookInNotion(apiKey, pageId, bookData) {
                     number: ((_d = bookData.progressData) === null || _d === void 0 ? void 0 : _d.progress) || bookData.progress || 0,
                 },
             };
-            if (normalizedCoverUrl) {
+            if (coverUrl) {
                 properties.封面 = {
                     files: [
                         {
                             type: "external",
                             name: `${bookData.title}-封面`,
                             external: {
-                                url: normalizedCoverUrl,
+                                url: coverUrl,
                             },
                         },
                     ],

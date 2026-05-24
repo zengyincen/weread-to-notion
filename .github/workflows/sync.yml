@@ -12,7 +12,8 @@ jobs:
   test-cover-fetch:
     name: 封面获取功能测试
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '封面')
+    # 在手动触发、定时触发或包含'封面'关键词的提交时运行测试
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || (github.event.head_commit && contains(github.event.head_commit.message, '封面'))
 
     steps:
       - name: Checkout code

@@ -175,9 +175,15 @@ export async function writeBookToNotion(
 
     // 从bookData中提取译者信息 (通常不在基本元数据中，可能需要单独处理)
     const translator = bookData.translator || "";
+    const coverUrl = await getBookCoverUrl(
+      bookData.cover,
+      bookData.title,
+      bookData.author || "未知作者",
+      bookData.isbn
+    );
 
     // 构建要写入的数据
-    const data = {
+    const data: any = {
       parent: {
         database_id: databaseId,
       },
@@ -214,28 +220,6 @@ export async function writeBookToNotion(
               },
             },
           ],
-        },
-        封面: {
-          files: (async () => {
-            const coverUrl = await getBookCoverUrl(
-              bookData.cover,
-              bookData.title,
-              bookData.author || "未知作者",
-              bookData.isbn
-            );
-            if (!coverUrl) {
-              return [];
-            }
-            return [
-              {
-                type: "external",
-                name: `${bookData.title}-封面`,
-                external: {
-                  url: coverUrl,
-                },
-              },
-            ];
-          })(),
         },
         // ISBN是rich_text类型
         ISBN: {
@@ -321,6 +305,21 @@ export async function writeBookToNotion(
         },
       },
     };
+
+    // 添加封面属性（如果有封面URL）
+    if (coverUrl) {
+      data.properties.封面 = {
+        files: [
+          {
+            type: "external",
+            name: `${bookData.title}-封面`,
+            external: {
+              url: coverUrl,
+            },
+          },
+        ],
+      };
+    }
     // 发送请求创建页面
     const response = await axios.post(`${NOTION_API_BASE_URL}/pages`, data, {
       headers,
