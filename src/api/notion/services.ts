@@ -6,6 +6,7 @@ import axios, { AxiosError } from "axios";
 import { NOTION_API_BASE_URL, NOTION_VERSION } from "../../config/constants";
 import { NotionBlockType } from "../../config/types";
 import { getNotionHeaders } from "../../utils/http";
+import { normalizeCoverUrl } from "../../utils/cover";
 import {
   BookProperties,
   NotionBlock,
@@ -158,7 +159,13 @@ export async function writeBookToNotion(
       bookData.author || "未知作者"
     );
     if (existCheck.exists && existCheck.pageId) {
-      console.log(`书籍已存在，将使用现有页面: ${existCheck.pageId}`);
+      console.log(`书籍已存在，将更新现有页面: ${existCheck.pageId}`);
+      const updateResult = await updateBookInNotion(apiKey, existCheck.pageId, bookData);
+      if (updateResult) {
+        console.log(`成功更新书籍《${bookData.title}》`);
+      } else {
+        console.warn(`更新书籍《${bookData.title}》失败`);
+      }
       return { success: true, pageId: existCheck.pageId };
     }
 
@@ -207,28 +214,22 @@ export async function writeBookToNotion(
             },
           ],
         },
-        // 类型是rich_text类型 - 修改为使用category字段
-        类型: {
-          rich_text: [
-            {
-              type: "text",
-              text: {
-                content: bookData.category || "未知类型",
-              },
-            },
-          ],
-        },
-        // 封面是文件类型，但支持URL
         封面: {
-          files: [
-            {
-              type: "external",
-              name: `${bookData.title}-封面`,
-              external: {
-                url: bookData.cover || "",
+          files: (() => {
+            const normalizedCoverUrl = normalizeCoverUrl(bookData.cover);
+            if (!normalizedCoverUrl) {
+              return [];
+            }
+            return [
+              {
+                type: "external",
+                name: `${bookData.title}-封面`,
+                external: {
+                  url: normalizedCoverUrl,
+                },
               },
-            },
-          ],
+            ];
+          })(),
         },
         // ISBN是rich_text类型
         ISBN: {
@@ -334,6 +335,165 @@ export async function writeBookToNotion(
       );
     }
     return { success: false };
+  }
+}
+
+/**
+ * 更新Notion数据库中的书籍属性
+ */
+export async function updateBookInNotion(
+  apiKey: string,
+  pageId: string,
+  bookData: any
+): Promise<boolean> {
+  try {
+    console.log(`\n更新书籍《${bookData.title}》的属性...`);
+
+    const headers = getNotionHeaders(apiKey, NOTION_VERSION);
+
+    const translator = bookData.translator || "";
+    const normalizedCoverUrl = normalizeCoverUrl(bookData.cover);
+
+    const properties: any = {
+      书名: {
+        title: [
+          {
+            type: "text",
+            text: {
+              content: bookData.title,
+            },
+          },
+        ],
+      },
+      作者: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: bookData.author || "未知作者",
+            },
+          },
+        ],
+      },
+      译者: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: translator,
+            },
+          },
+        ],
+      },
+      ISBN: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: bookData.isbn || "",
+            },
+          },
+        ],
+      },
+      出版社: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: bookData.publisher || "",
+            },
+          },
+        ],
+      },
+      分类: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: bookData.category || "",
+            },
+          },
+        ],
+      },
+      阅读状态: {
+        select: {
+          name:
+            bookData.finishReadingStatus ||
+            (bookData.finishReading
+              ? "✅已读"
+              : bookData.progress && bookData.progress > 0
+              ? "📖在读"
+              : "📕未读"),
+        },
+      },
+      开始阅读: {
+        date: bookData.progressData?.startReadingTime
+          ? {
+              start: new Date(bookData.progressData.startReadingTime * 1000)
+                .toISOString()
+                .split("T")[0],
+            }
+          : null,
+      },
+      完成阅读: {
+        date: bookData.progressData?.finishTime
+          ? {
+              start: new Date(bookData.progressData.finishTime * 1000)
+                .toISOString()
+                .split("T")[0],
+            }
+          : null,
+      },
+      阅读总时长: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: bookData.progressData?.readingTime
+                ? formatReadingTime(bookData.progressData.readingTime)
+                : "未记录",
+            },
+          },
+        ],
+      },
+      阅读进度: {
+        number: bookData.progressData?.progress || bookData.progress || 0,
+      },
+    };
+
+    if (normalizedCoverUrl) {
+      properties.封面 = {
+        files: [
+          {
+            type: "external",
+            name: `${bookData.title}-封面`,
+            external: {
+              url: normalizedCoverUrl,
+            },
+          },
+        ],
+      };
+    }
+
+    const response = await axios.patch(
+      `${NOTION_API_BASE_URL}/pages/${pageId}`,
+      { properties },
+      { headers }
+    );
+
+    console.log(`更新成功，响应状态码: ${response.status}`);
+    return true;
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError;
+    console.error("更新书籍属性失败:", axiosError.message);
+    if (axiosError.response) {
+      console.error("响应状态:", axiosError.response.status);
+      console.error(
+        "响应数据:",
+        JSON.stringify(axiosError.response.data, null, 2)
+      );
+    }
+    return false;
   }
 }
 
