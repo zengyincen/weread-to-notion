@@ -17,8 +17,7 @@ function getBrowserCookie() {
     // 如果环境变量中没有设置，提示用户正确配置
     console.error("错误: 未设置 WEREAD_COOKIE 环境变量，请在 .env 文件中设置您的微信读书 Cookie");
     console.error("提示: 您可以复制 env.example 文件为 .env 并在其中填入您的 Cookie");
-    process.exit(1); // 退出程序
-    return ""; // 这行代码永远不会执行，但需要返回值以满足TypeScript类型检查
+    process.exit(1);
 }
 /**
  * 合并新旧Cookie

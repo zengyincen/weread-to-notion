@@ -189,17 +189,6 @@ function writeBookToNotion(apiKey, databaseId, bookData) {
                             },
                         ],
                     },
-                    // 类型是rich_text类型 - 修改为使用category字段
-                    类型: {
-                        rich_text: [
-                            {
-                                type: "text",
-                                text: {
-                                    content: bookData.category || "未知类型",
-                                },
-                            },
-                        ],
-                    },
                     封面: {
                         files: (() => {
                             const normalizedCoverUrl = (0, cover_1.normalizeCoverUrl)(bookData.cover);
@@ -357,16 +346,6 @@ function updateBookInNotion(apiKey, pageId, bookData) {
                             type: "text",
                             text: {
                                 content: translator,
-                            },
-                        },
-                    ],
-                },
-                类型: {
-                    rich_text: [
-                        {
-                            type: "text",
-                            text: {
-                                content: bookData.category || "未知类型",
                             },
                         },
                     ],

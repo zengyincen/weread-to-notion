@@ -46,14 +46,16 @@ export async function loadLibraryConfig(
       console.log("未找到'同步配置'页面，使用默认配置（同步所有状态）");
       return {
         enabledReadingStatus: ["已读", "在读", "未读"],
-        enabledAuthors: [], // 空数组表示不限制作者
+        enabledAuthors: [],
+        syncMode: "增量",
+        organizeByChapter: "否",
       };
     }
 
     // 获取第一个匹配的配置页面
     const configPage = data.results[0];
-    const readingStatusOptions = configPage.properties.阅读状态.multi_select;
-    const authorOptions = configPage.properties.作者.multi_select;
+    const readingStatusOptions = configPage.properties.阅读状态?.multi_select || [];
+    const authorOptions = configPage.properties.作者?.multi_select || [];
     const syncModeOption = configPage.properties["全量/增量"]?.select?.name;
     const organizeByChapterOption =
       configPage.properties["按章节划线"]?.select?.name;
@@ -94,7 +96,9 @@ export async function loadLibraryConfig(
     // 出错时返回默认配置
     return {
       enabledReadingStatus: ["已读", "在读", "未读"],
-      enabledAuthors: [], // 空数组表示不限制作者
+      enabledAuthors: [],
+      syncMode: "增量",
+      organizeByChapter: "否",
     };
   }
 }

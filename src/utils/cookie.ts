@@ -19,8 +19,7 @@ export function getBrowserCookie(): string {
   console.error(
     "提示: 您可以复制 env.example 文件为 .env 并在其中填入您的 Cookie"
   );
-  process.exit(1); // 退出程序
-  return ""; // 这行代码永远不会执行，但需要返回值以满足TypeScript类型检查
+  process.exit(1);
 }
 
 /**

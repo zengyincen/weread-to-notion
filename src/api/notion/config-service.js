@@ -25,7 +25,7 @@ const axios_1 = __importDefault(require("axios"));
  */
 function loadLibraryConfig(apiKey, configDatabaseId) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f;
         try {
             console.log("正在读取图书馆配置...");
             // 查询配置数据库，查找名称为"同步配置"的页面
@@ -48,17 +48,17 @@ function loadLibraryConfig(apiKey, configDatabaseId) {
                 console.log("未找到'同步配置'页面，使用默认配置（同步所有状态）");
                 return {
                     enabledReadingStatus: ["已读", "在读", "未读"],
-                    enabledAuthors: [], // 空数组表示不限制作者
+                    enabledAuthors: [],
                     syncMode: "增量",
                     organizeByChapter: "否",
                 };
             }
             // 获取第一个匹配的配置页面
             const configPage = data.results[0];
-            const readingStatusOptions = configPage.properties.阅读状态.multi_select;
-            const authorOptions = configPage.properties.作者.multi_select;
-            const syncModeOption = (_b = (_a = configPage.properties["全量/增量"]) === null || _a === void 0 ? void 0 : _a.select) === null || _b === void 0 ? void 0 : _b.name;
-            const organizeByChapterOption = (_d = (_c = configPage.properties["按章节划线"]) === null || _c === void 0 ? void 0 : _c.select) === null || _d === void 0 ? void 0 : _d.name;
+            const readingStatusOptions = ((_a = configPage.properties.阅读状态) === null || _a === void 0 ? void 0 : _a.multi_select) || [];
+            const authorOptions = ((_b = configPage.properties.作者) === null || _b === void 0 ? void 0 : _b.multi_select) || [];
+            const syncModeOption = (_d = (_c = configPage.properties["全量/增量"]) === null || _c === void 0 ? void 0 : _c.select) === null || _d === void 0 ? void 0 : _d.name;
+            const organizeByChapterOption = (_f = (_e = configPage.properties["按章节划线"]) === null || _e === void 0 ? void 0 : _e.select) === null || _f === void 0 ? void 0 : _f.name;
             // 提取选中的阅读状态
             const enabledReadingStatus = readingStatusOptions.map((option) => option.name);
             // 提取选中的作者
@@ -84,7 +84,7 @@ function loadLibraryConfig(apiKey, configDatabaseId) {
             // 出错时返回默认配置
             return {
                 enabledReadingStatus: ["已读", "在读", "未读"],
-                enabledAuthors: [], // 空数组表示不限制作者
+                enabledAuthors: [],
                 syncMode: "增量",
                 organizeByChapter: "否",
             };

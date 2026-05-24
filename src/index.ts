@@ -10,6 +10,7 @@ import { syncAllBooksWithConfig } from "./core/sync/all-books-sync-with-config";
 import { getBrowserCookie } from "./utils/cookie";
 import { refreshSession } from "./api/weread/services";
 import { checkAndMigrateIfNeeded } from "./core/migration";
+import { loadLibraryConfig } from "./api/notion/config-service";
 
 // 环境变量文件路径
 const ENV_FILE_PATH = ".env";
@@ -76,9 +77,6 @@ async function main() {
       if (CONFIG_DATABASE_ID) {
         console.log("检测到配置数据库ID，将使用配置过滤同步");
         // 加载配置，决定 useIncremental
-        const { loadLibraryConfig } = await import(
-          "./api/notion/config-service"
-        );
         const config = await loadLibraryConfig(
           NOTION_API_KEY,
           CONFIG_DATABASE_ID
@@ -101,9 +99,6 @@ async function main() {
       // 同步单本书籍
       let organizeByChapter = false;
       if (CONFIG_DATABASE_ID) {
-        const { loadLibraryConfig } = await import(
-          "./api/notion/config-service"
-        );
         const config = await loadLibraryConfig(
           NOTION_API_KEY,
           CONFIG_DATABASE_ID
