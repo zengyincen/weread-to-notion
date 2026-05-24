@@ -48,6 +48,12 @@ export function normalizeCoverUrl(coverUrl: string): string {
     if (trimmedUrl.includes("weread.qq.com") || trimmedUrl.includes("qpic.cn")) {
       return trimmedUrl;
     }
+    // 用户导入的书籍使用 res.weread.qq.com/wrepub/xxx_parsecover 格式
+    // 这种URL无法直接在Notion中显示，返回空字符串
+    if (trimmedUrl.includes("res.weread.qq.com/wrepub") && trimmedUrl.includes("_parsecover")) {
+      console.warn(`用户导入书籍的封面URL无法直接使用: ${trimmedUrl}`);
+      return "";
+    }
     // 其他https URL可能不是有效的封面
     console.warn(`无效的封面URL: ${trimmedUrl}`);
     return "";

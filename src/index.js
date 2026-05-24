@@ -71,18 +71,6 @@ function main() {
             // 刷新会话
             cookie = yield (0, services_1.refreshSession)(cookie);
             console.log("会话已刷新");
-            // 配置封面获取选项
-            const coverFetchOptions = {
-                wereadCookie: cookie,
-                useImageUpload: true, // 启用图片上传功能
-                imgurClientId: process.env.IMGUR_CLIENT_ID,
-                githubToken: process.env.GITHUB_TOKEN,
-                githubRepository: process.env.GITHUB_REPOSITORY,
-            };
-            console.log("封面获取配置:");
-            console.log(`  启用图片上传: ${coverFetchOptions.useImageUpload}`);
-            console.log(`  Imgur: ${coverFetchOptions.imgurClientId ? "已配置" : "未配置"}`);
-            console.log(`  GitHub: ${coverFetchOptions.githubToken ? "已配置" : "未配置"}`);
             if (syncAll) {
                 // 同步所有书籍
                 if (CONFIG_DATABASE_ID) {
@@ -93,7 +81,7 @@ function main() {
                     // 命令行 --full-sync 优先级更高
                     if (cliFullSync)
                         useIncremental = false;
-                    yield (0, all_books_sync_with_config_1.syncAllBooksWithConfig)(NOTION_API_KEY, DATABASE_ID, cookie, useIncremental, CONFIG_DATABASE_ID, coverFetchOptions);
+                    yield (0, all_books_sync_with_config_1.syncAllBooksWithConfig)(NOTION_API_KEY, DATABASE_ID, cookie, useIncremental, CONFIG_DATABASE_ID);
                 }
                 else {
                     console.log("未配置CONFIG_DATABASE_ID，使用默认同步（所有书籍）");

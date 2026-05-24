@@ -7,6 +7,7 @@ import { NOTION_API_BASE_URL, NOTION_VERSION } from "../../config/constants";
 import { NotionBlockType } from "../../config/types";
 import { getNotionHeaders } from "../../utils/http";
 import { normalizeCoverUrl } from "../../utils/cover";
+import { getBookCoverUrl } from "../../utils/cover-fetch";
 import {
   BookProperties,
   NotionBlock,
@@ -215,9 +216,14 @@ export async function writeBookToNotion(
           ],
         },
         封面: {
-          files: (() => {
-            const normalizedCoverUrl = normalizeCoverUrl(bookData.cover);
-            if (!normalizedCoverUrl) {
+          files: (async () => {
+            const coverUrl = await getBookCoverUrl(
+              bookData.cover,
+              bookData.title,
+              bookData.author || "未知作者",
+              bookData.isbn
+            );
+            if (!coverUrl) {
               return [];
             }
             return [
@@ -225,7 +231,7 @@ export async function writeBookToNotion(
                 type: "external",
                 name: `${bookData.title}-封面`,
                 external: {
-                  url: normalizedCoverUrl,
+                  url: coverUrl,
                 },
               },
             ];
@@ -352,7 +358,12 @@ export async function updateBookInNotion(
     const headers = getNotionHeaders(apiKey, NOTION_VERSION);
 
     const translator = bookData.translator || "";
-    const normalizedCoverUrl = normalizeCoverUrl(bookData.cover);
+    const coverUrl = await getBookCoverUrl(
+      bookData.cover,
+      bookData.title,
+      bookData.author || "未知作者",
+      bookData.isbn
+    );
 
     const properties: any = {
       书名: {
@@ -461,14 +472,14 @@ export async function updateBookInNotion(
       },
     };
 
-    if (normalizedCoverUrl) {
+    if (coverUrl) {
       properties.封面 = {
         files: [
           {
             type: "external",
             name: `${bookData.title}-封面`,
             external: {
-              url: normalizedCoverUrl,
+              url: coverUrl,
             },
           },
         ],

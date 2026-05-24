@@ -23,7 +23,6 @@ exports.getBookCoverUrl = getBookCoverUrl;
 exports.generateDefaultCoverSVG = generateDefaultCoverSVG;
 const axios_1 = __importDefault(require("axios"));
 const cover_1 = require("./cover");
-const image_upload_1 = require("./image-upload");
 /**
  * 检测是否为用户导入的书籍（通过封面URL判断）
  */
@@ -124,9 +123,9 @@ function searchBookCoverByISBN(isbn) {
 }
 /**
  * 获取书籍封面URL
- * 优先使用原有封面，如果不可用则尝试搜索或下载上传
+ * 优先使用原有封面，如果不可用则尝试搜索
  */
-function getBookCoverUrl(originalCoverUrl, bookTitle, bookAuthor, bookIsbn, options) {
+function getBookCoverUrl(originalCoverUrl, bookTitle, bookAuthor, bookIsbn) {
     return __awaiter(this, void 0, void 0, function* () {
         // 首先检查原有封面是否可用
         const normalizedUrl = (0, cover_1.normalizeCoverUrl)(originalCoverUrl);
@@ -135,22 +134,8 @@ function getBookCoverUrl(originalCoverUrl, bookTitle, bookAuthor, bookIsbn, opti
             if (!isUserImportedBook(originalCoverUrl)) {
                 return normalizedUrl;
             }
-            console.log(`《${bookTitle}》是用户导入书籍，处理中...`);
-            // 方案1: 如果启用了图片上传，尝试下载并上传到图床
-            if ((options === null || options === void 0 ? void 0 : options.useImageUpload) && (options === null || options === void 0 ? void 0 : options.wereadCookie)) {
-                console.log("尝试下载并上传封面...");
-                const uploadedUrl = yield (0, image_upload_1.processImportedBookCover)(originalCoverUrl, bookTitle, {
-                    wereadCookie: options.wereadCookie,
-                    imgurClientId: options.imgurClientId,
-                    githubToken: options.githubToken,
-                    githubRepository: options.githubRepository,
-                });
-                if (uploadedUrl) {
-                    return uploadedUrl;
-                }
-            }
-            // 方案2: 尝试通过 Open Library 搜索封面
-            console.log("尝试通过 Open Library 搜索封面...");
+            // 对于用户导入的书籍，尝试搜索封面
+            console.log(`《${bookTitle}》封面不可用，尝试搜索...`);
             // 如果有 ISBN，优先使用 ISBN 搜索
             if (bookIsbn && bookIsbn.trim()) {
                 const isbnCover = yield searchBookCoverByISBN(bookIsbn);

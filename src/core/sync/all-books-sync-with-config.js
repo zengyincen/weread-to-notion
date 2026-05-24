@@ -24,7 +24,7 @@ const book_filter_1 = require("../book-filter");
  * 同步所有书籍到Notion（带配置过滤）
  */
 function syncAllBooksWithConfig(apiKey_1, databaseId_1, cookie_1) {
-    return __awaiter(this, arguments, void 0, function* (apiKey, databaseId, cookie, useIncremental = true, configDatabaseId, coverFetchOptions) {
+    return __awaiter(this, arguments, void 0, function* (apiKey, databaseId, cookie, useIncremental = true, configDatabaseId) {
         console.log(`\n=== 开始${useIncremental ? "增量" : "全量"}同步所有书籍（带配置过滤）===`);
         try {
             // 1. 加载同步配置
@@ -76,11 +76,6 @@ function syncAllBooksWithConfig(apiKey_1, databaseId_1, cookie_1) {
                 if (exists && existingPageId) {
                     console.log(`《${book.title}》已存在于Notion，将更新现有记录`);
                     finalPageId = existingPageId;
-                    // 可选：更新现有书籍的封面
-                    console.log(`尝试更新《${book.title}》的封面...`);
-                    const detailedBookInfo = yield (0, services_1.getBookInfo)(cookie, book.bookId);
-                    const enhancedBook = Object.assign(Object.assign({}, book), { isbn: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.isbn) || book.isbn || "", publisher: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.publisher) || book.publisher || "", intro: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.intro) || book.intro || "", publishTime: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.publishTime) || book.publishTime || "" });
-                    yield (0, services_2.updateBookInNotion)(apiKey, existingPageId, enhancedBook, coverFetchOptions);
                 }
                 else {
                     // 获取书籍详细信息（包括ISBN和出版社）
@@ -94,7 +89,7 @@ function syncAllBooksWithConfig(apiKey_1, databaseId_1, cookie_1) {
                         intro: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.intro) || book.intro || "", publishTime: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.publishTime) || book.publishTime || "" });
                     console.log(`获取到ISBN: ${enhancedBook.isbn}, 出版社: ${enhancedBook.publisher}`);
                     // 写入书籍元数据到Notion
-                    const writeResult = yield (0, services_2.writeBookToNotion)(apiKey, databaseId, enhancedBook, coverFetchOptions);
+                    const writeResult = yield (0, services_2.writeBookToNotion)(apiKey, databaseId, enhancedBook);
                     if (!writeResult.success || !writeResult.pageId) {
                         failCount++;
                         console.log(`《${book.title}》同步失败`);
