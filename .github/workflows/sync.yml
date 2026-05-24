@@ -8,8 +8,100 @@ on:
   workflow_dispatch:
 
 jobs:
+  # 封面获取功能测试
+  test-cover-fetch:
+    name: 封面获取功能测试
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '封面')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: 运行封面获取测试
+        run: |
+          echo "=== 测试1: 检测用户导入书籍 ==="
+          node -e "
+            const { isUserImportedBook } = require('./dist/utils/cover-fetch');
+
+            // 测试用例
+            const testCases = [
+              {
+                url: 'https://res.weread.qq.com/wrepub/CB_3UF7Pr7OL1GK73Y71YBeL2dd_parsecover',
+                expected: true,
+                description: '用户导入的书籍封面'
+              },
+              {
+                url: 'https://weread.qq.com/cover/123456.jpg',
+                expected: false,
+                description: '普通书籍封面'
+              }
+            ];
+
+            let allPassed = true;
+            testCases.forEach((testCase, index) => {
+              const result = isUserImportedBook(testCase.url);
+              const passed = result === testCase.expected;
+              if (!passed) allPassed = false;
+
+              console.log('测试 ' + (index + 1) + ': ' + testCase.description);
+              console.log('  URL: ' + testCase.url);
+              console.log('  期望: ' + testCase.expected + ', 实际: ' + result);
+              console.log('  结果: ' + (passed ? '✅ 通过' : '❌ 失败'));
+            });
+
+            if (!allPassed) {
+              console.error('部分测试失败！');
+              process.exit(1);
+            } else {
+              console.log('✅ 所有测试通过！');
+            }
+          "
+
+      - name: 运行书名作者搜索测试
+        run: |
+          echo "=== 测试2: 通过书名和作者搜索封面 ==="
+          npx ts-node -e "
+            import { searchBookCover } from './src/utils/cover-fetch';
+
+            console.log('开始测试书名和作者搜索功能...');
+
+            const testBooks = [
+              { title: 'Clean Code', author: 'Robert C. Martin' }
+            ];
+
+            for (const book of testBooks) {
+              console.log('搜索书籍: 《' + book.title + '》 作者: ' + book.author);
+              try {
+                const coverUrl = await searchBookCover(book.title, book.author);
+                if (coverUrl) {
+                  console.log('✅ 找到封面: ' + coverUrl);
+                } else {
+                  console.log('⚠️  未找到封面（网络问题或书籍不在数据库中）');
+                }
+              } catch (error: any) {
+                console.log('⚠️  搜索失败: ' + error.message);
+              }
+            }
+          "
+
+  # 同步主任务
   sync:
     runs-on: ubuntu-latest
+    needs: test-cover-fetch
     # 添加权限设置
     permissions:
       contents: write
