@@ -75,8 +75,8 @@ function main() {
             const uploadOptions = {
                 wereadCookie: cookie,
                 imgurClientId: process.env.IMGUR_CLIENT_ID,
-                githubToken: process.env.GITHUB_TOKEN,
-                githubRepository: process.env.GITHUB_REPOSITORY,
+                githubToken: process.env.GIT_TOKEN,
+                githubRepository: process.env.GIT_REPO,
             };
             if (syncAll) {
                 // 同步所有书籍
