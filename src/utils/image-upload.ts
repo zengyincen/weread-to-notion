@@ -140,6 +140,45 @@ export async function uploadToGitHub(
 }
 
 /**
+ * 尝试直接修改URL获取可访问的图片
+ * 有些情况下，简单地添加图片后缀就能让服务器返回正确的图片
+ */
+async function tryDirectUrlFix(coverUrl: string): Promise<string | null> {
+  try {
+    // 尝试几种常见的图片后缀
+    const extensions = [".jpg", ".jpeg", ".png", ".webp"];
+    
+    for (const ext of extensions) {
+      // 移除可能存在的后缀
+      let fixedUrl = coverUrl.replace(/_parsecover$/, "");
+      // 添加新后缀
+      fixedUrl = fixedUrl + ext;
+      
+      console.log(`尝试直接URL修复: ${fixedUrl}`);
+      
+      // 检查URL是否可访问
+      const response = await axios.head(fixedUrl, {
+        timeout: 5000,
+        headers: {
+          "Referer": "https://weread.qq.com/",
+        },
+      });
+      
+      // 如果状态码是200，说明可以访问
+      if (response.status === 200) {
+        console.log(`✓ 直接URL修复成功: ${fixedUrl}`);
+        return fixedUrl;
+      }
+    }
+  } catch (error) {
+    // 忽略错误，继续尝试其他方法
+    console.log("直接URL修复失败，继续尝试下载上传方案");
+  }
+  
+  return null;
+}
+
+/**
  * 处理用户导入书籍的封面（GitHub Actions环境方案）
  * 支持多种图床服务
  */
@@ -149,6 +188,15 @@ export async function processImportedBookCover(
   options: UploadOptions
 ): Promise<string | null> {
   console.log(`\n=== 处理用户导入书籍封面: 《${bookTitle}》===`);
+  
+  // 方案1: 先尝试直接修改URL
+  const directUrl = await tryDirectUrlFix(coverUrl);
+  if (directUrl) {
+    return directUrl;
+  }
+  
+  // 方案2: 下载并上传到图床
+  console.log("使用下载上传方案...");
   
   // 1. 下载封面
   const imageBuffer = await downloadWereadCover(coverUrl, options.wereadCookie);
