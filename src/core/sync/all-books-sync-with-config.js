@@ -20,7 +20,7 @@ const services_1 = require("../../api/weread/services");
 const services_2 = require("../../api/notion/services");
 const config_service_1 = require("../../api/notion/config-service");
 const book_filter_1 = require("../book-filter");
-const cover_fetch_1 = require("../../utils/cover-fetch");
+const cover_1 = require("../../utils/cover");
 /**
  * 同步所有书籍到Notion（带配置过滤）
  */
@@ -76,12 +76,12 @@ function syncAllBooksWithConfig(apiKey_1, databaseId_1, cookie_1) {
                 let finalPageId;
                 if (exists && existingPageId) {
                     console.log(`《${book.title}》已存在于Notion`);
-                    // 检查现有封面是否是用户导入书籍的格式
-                    if (existingCoverUrl && (0, cover_fetch_1.isUserImportedBook)(existingCoverUrl)) {
-                        console.log(`检测到封面是用户导入格式，需要更新...`);
+                    // 检查现有封面是否需要更新（为空、失效或用户导入格式）
+                    if ((0, cover_1.isCoverNeedUpdate)(existingCoverUrl)) {
+                        console.log(`检测到封面需要更新（${existingCoverUrl ? '用户导入格式' : '为空'}），正在处理...`);
                         // 获取书籍详细信息（包括ISBN和出版社）
                         const detailedBookInfo = yield (0, services_1.getBookInfo)(cookie, book.bookId);
-                        const enhancedBook = Object.assign(Object.assign({}, book), { isbn: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.isbn) || book.isbn || "", publisher: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.publisher) || book.publisher || "", cover: existingCoverUrl });
+                        const enhancedBook = Object.assign(Object.assign({}, book), { isbn: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.isbn) || book.isbn || "", publisher: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.publisher) || book.publisher || "", cover: book.cover || existingCoverUrl });
                         yield (0, services_2.updateBookInNotion)(apiKey, existingPageId, enhancedBook, uploadOptions);
                     }
                     finalPageId = existingPageId;

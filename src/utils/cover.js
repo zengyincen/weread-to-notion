@@ -3,6 +3,8 @@
  * 封面URL处理工具
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isCoverNeedUpdate = isCoverNeedUpdate;
+exports.isUserImportedBookUrl = isUserImportedBookUrl;
 exports.normalizeCoverUrl = normalizeCoverUrl;
 exports.getCoverUrlWithSize = getCoverUrlWithSize;
 const constants_1 = require("../config/constants");
@@ -17,6 +19,32 @@ function isValidUrl(url) {
     catch (_a) {
         return false;
     }
+}
+/**
+ * 检测封面链接是否需要更新
+ * 需要更新的情况：
+ * 1. 封面链接为空
+ * 2. 封面链接是用户导入书籍格式（res.weread.qq.com/wrepub/..._parsecover）
+ *
+ * @param coverUrl 封面链接
+ * @returns 是否需要更新
+ */
+function isCoverNeedUpdate(coverUrl) {
+    if (!coverUrl || coverUrl.trim() === "") {
+        return true;
+    }
+    return isUserImportedBookUrl(coverUrl);
+}
+/**
+ * 检测是否是用户导入书籍的封面链接
+ * @param coverUrl 封面链接
+ * @returns 是否是用户导入书籍格式
+ */
+function isUserImportedBookUrl(coverUrl) {
+    if (!coverUrl || typeof coverUrl !== "string") {
+        return false;
+    }
+    return coverUrl.includes("res.weread.qq.com/wrepub") && coverUrl.includes("_parsecover");
 }
 /**
  * 规范化微信读书封面URL

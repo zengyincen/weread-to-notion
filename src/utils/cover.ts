@@ -17,6 +17,34 @@ function isValidUrl(url: string): boolean {
 }
 
 /**
+ * 检测封面链接是否需要更新
+ * 需要更新的情况：
+ * 1. 封面链接为空
+ * 2. 封面链接是用户导入书籍格式（res.weread.qq.com/wrepub/..._parsecover）
+ * 
+ * @param coverUrl 封面链接
+ * @returns 是否需要更新
+ */
+export function isCoverNeedUpdate(coverUrl: string | undefined): boolean {
+  if (!coverUrl || coverUrl.trim() === "") {
+    return true;
+  }
+  return isUserImportedBookUrl(coverUrl);
+}
+
+/**
+ * 检测是否是用户导入书籍的封面链接
+ * @param coverUrl 封面链接
+ * @returns 是否是用户导入书籍格式
+ */
+export function isUserImportedBookUrl(coverUrl: string): boolean {
+  if (!coverUrl || typeof coverUrl !== "string") {
+    return false;
+  }
+  return coverUrl.includes("res.weread.qq.com/wrepub") && coverUrl.includes("_parsecover");
+}
+
+/**
  * 规范化微信读书封面URL
  * 微信读书API返回的封面URL可能有多种格式：
  * - 完整URL: https://weread.qq.com/cover/xxx.jpg

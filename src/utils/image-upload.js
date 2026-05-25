@@ -141,7 +141,7 @@ function uploadToGitHub(imageBuffer, token, repoConfig, fileName) {
 }
 /**
  * 处理用户导入书籍的封面（GitHub Actions环境方案）
- * 支持多种图床服务
+ * 支持多种图床服务，优先使用 GitHub 图床
  */
 function processImportedBookCover(coverUrl, bookTitle, options) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -154,18 +154,18 @@ function processImportedBookCover(coverUrl, bookTitle, options) {
         }
         // 2. 尝试上传到图床
         let uploadResult = null;
-        // 优先使用 Imgur
-        if (options.imgurClientId) {
-            uploadResult = yield uploadToImgur(imageBuffer, options.imgurClientId);
-        }
-        // Imgur 失败则尝试 GitHub
-        if (!(uploadResult === null || uploadResult === void 0 ? void 0 : uploadResult.success) &&
-            options.githubToken &&
-            options.githubRepository) {
+        // 优先使用 GitHub 图床
+        if (options.githubToken && options.githubRepository) {
+            console.log("正在使用 GitHub 图床...");
             const sanitizedTitle = bookTitle
                 .replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "_")
                 .substring(0, 50);
             uploadResult = yield uploadToGitHub(imageBuffer, options.githubToken, options.githubRepository, `${sanitizedTitle}.jpg`);
+        }
+        // GitHub 失败则尝试 Imgur
+        if (!(uploadResult === null || uploadResult === void 0 ? void 0 : uploadResult.success) && options.imgurClientId) {
+            console.log("GitHub 图床上传失败，尝试使用 Imgur...");
+            uploadResult = yield uploadToImgur(imageBuffer, options.imgurClientId);
         }
         if ((uploadResult === null || uploadResult === void 0 ? void 0 : uploadResult.success) && uploadResult.url) {
             console.log(`✓ 封面处理完成: ${uploadResult.url}`);

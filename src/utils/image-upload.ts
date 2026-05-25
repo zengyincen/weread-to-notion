@@ -159,7 +159,7 @@ export async function uploadToGitHub(
 
 /**
  * 处理用户导入书籍的封面（GitHub Actions环境方案）
- * 支持多种图床服务
+ * 支持多种图床服务，优先使用 GitHub 图床
  */
 export async function processImportedBookCover(
   coverUrl: string,
@@ -178,17 +178,9 @@ export async function processImportedBookCover(
   // 2. 尝试上传到图床
   let uploadResult: UploadResult | null = null;
   
-  // 优先使用 Imgur
-  if (options.imgurClientId) {
-    uploadResult = await uploadToImgur(imageBuffer, options.imgurClientId);
-  }
-  
-  // Imgur 失败则尝试 GitHub
-  if (
-    !(uploadResult?.success) &&
-    options.githubToken &&
-    options.githubRepository
-  ) {
+  // 优先使用 GitHub 图床
+  if (options.githubToken && options.githubRepository) {
+    console.log("正在使用 GitHub 图床...");
     const sanitizedTitle = bookTitle
       .replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "_")
       .substring(0, 50);
@@ -198,6 +190,12 @@ export async function processImportedBookCover(
       options.githubRepository,
       `${sanitizedTitle}.jpg`
     );
+  }
+  
+  // GitHub 失败则尝试 Imgur
+  if (!(uploadResult?.success) && options.imgurClientId) {
+    console.log("GitHub 图床上传失败，尝试使用 Imgur...");
+    uploadResult = await uploadToImgur(imageBuffer, options.imgurClientId);
   }
   
   if (uploadResult?.success && uploadResult.url) {
