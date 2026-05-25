@@ -78,25 +78,27 @@ jobs:
           npx ts-node -e "
             import { searchBookCover } from './src/utils/cover-fetch';
 
-            console.log('开始测试书名和作者搜索功能...');
+            (async () => {
+              console.log('开始测试书名和作者搜索功能...');
 
-            const testBooks = [
-              { title: 'Clean Code', author: 'Robert C. Martin' }
-            ];
+              const testBooks = [
+                { title: 'Clean Code', author: 'Robert C. Martin' }
+              ];
 
-            for (const book of testBooks) {
-              console.log('搜索书籍: 《' + book.title + '》 作者: ' + book.author);
-              try {
-                const coverUrl = await searchBookCover(book.title, book.author);
-                if (coverUrl) {
-                  console.log('✅ 找到封面: ' + coverUrl);
-                } else {
-                  console.log('⚠️  未找到封面（网络问题或书籍不在数据库中）');
+              for (const book of testBooks) {
+                console.log('搜索书籍: 《' + book.title + '》 作者: ' + book.author);
+                try {
+                  const coverUrl = await searchBookCover(book.title, book.author);
+                  if (coverUrl) {
+                    console.log('✅ 找到封面: ' + coverUrl);
+                  } else {
+                    console.log('⚠️  未找到封面（网络问题或书籍不在数据库中）');
+                  }
+                } catch (error: any) {
+                  console.log('⚠️  搜索失败: ' + error.message);
                 }
-              } catch (error: any) {
-                console.log('⚠️  搜索失败: ' + error.message);
               }
-            }
+            })();
           "
 
   # 同步主任务
