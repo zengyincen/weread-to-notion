@@ -143,7 +143,7 @@ export async function uploadToGitHub(
     
     if (response.data && response.data.content) {
       // 使用 raw.githubusercontent.com 格式访问
-      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${path}`;
+      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/master/${path}`;
       console.log(`图片上传成功: ${rawUrl}`);
       return { success: true, url: rawUrl };
     }
