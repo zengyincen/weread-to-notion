@@ -95,7 +95,7 @@ function syncBookContent(apiKey_1, databaseId_1, cookie_1, bookId_1, finalPageId
  * 同步单本书
  */
 function syncSingleBook(apiKey_1, databaseId_1, cookie_1, bookId_1) {
-    return __awaiter(this, arguments, void 0, function* (apiKey, databaseId, cookie, bookId, useIncremental = true, organizeByChapter = false) {
+    return __awaiter(this, arguments, void 0, function* (apiKey, databaseId, cookie, bookId, useIncremental = true, organizeByChapter = false, uploadOptions) {
         console.log(`\n=== 开始${useIncremental ? "增量" : "全量"}同步书籍(ID: ${bookId}) ===`);
         try {
             // 获取书籍详细信息
@@ -115,7 +115,7 @@ function syncSingleBook(apiKey_1, databaseId_1, cookie_1, bookId_1) {
             }
             else {
                 // 写入书籍元数据到Notion
-                const writeResult = yield (0, services_1.writeBookToNotion)(apiKey, databaseId, bookInfo);
+                const writeResult = yield (0, services_1.writeBookToNotion)(apiKey, databaseId, bookInfo, uploadOptions);
                 if (!writeResult.success || !writeResult.pageId) {
                     console.error(`写入书籍 ${bookId} 到Notion失败`);
                     return false;

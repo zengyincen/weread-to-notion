@@ -14,6 +14,7 @@ import {
   checkBookExistsInNotion,
   writeBookToNotion,
 } from "../../api/notion/services";
+import { UploadOptions } from "../../utils/image-upload";
 
 /**
  * 同步所有书籍到Notion
@@ -22,7 +23,8 @@ export async function syncAllBooks(
   apiKey: string,
   databaseId: string,
   cookie: string,
-  useIncremental: boolean = true
+  useIncremental: boolean = true,
+  uploadOptions?: UploadOptions
 ): Promise<void> {
   console.log(`\n=== 开始${useIncremental ? "增量" : "全量"}同步所有书籍 ===`);
 
@@ -90,7 +92,8 @@ export async function syncAllBooks(
         const writeResult = await writeBookToNotion(
           apiKey,
           databaseId,
-          enhancedBook
+          enhancedBook,
+          uploadOptions
         );
 
         if (!writeResult.success || !writeResult.pageId) {

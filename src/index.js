@@ -71,6 +71,13 @@ function main() {
             // 刷新会话
             cookie = yield (0, services_1.refreshSession)(cookie);
             console.log("会话已刷新");
+            // 创建封面上传配置
+            const uploadOptions = {
+                wereadCookie: cookie,
+                imgurClientId: process.env.IMGUR_CLIENT_ID,
+                githubToken: process.env.GITHUB_TOKEN,
+                githubRepository: process.env.GITHUB_REPOSITORY,
+            };
             if (syncAll) {
                 // 同步所有书籍
                 if (CONFIG_DATABASE_ID) {
@@ -81,11 +88,11 @@ function main() {
                     // 命令行 --full-sync 优先级更高
                     if (cliFullSync)
                         useIncremental = false;
-                    yield (0, all_books_sync_with_config_1.syncAllBooksWithConfig)(NOTION_API_KEY, DATABASE_ID, cookie, useIncremental, CONFIG_DATABASE_ID);
+                    yield (0, all_books_sync_with_config_1.syncAllBooksWithConfig)(NOTION_API_KEY, DATABASE_ID, cookie, useIncremental, CONFIG_DATABASE_ID, uploadOptions);
                 }
                 else {
                     console.log("未配置CONFIG_DATABASE_ID，使用默认同步（所有书籍）");
-                    yield (0, all_books_sync_1.syncAllBooks)(NOTION_API_KEY, DATABASE_ID, cookie, !fullSync);
+                    yield (0, all_books_sync_1.syncAllBooks)(NOTION_API_KEY, DATABASE_ID, cookie, !fullSync, uploadOptions);
                 }
             }
             else if (bookId) {
@@ -95,7 +102,7 @@ function main() {
                     const config = yield (0, config_service_1.loadLibraryConfig)(NOTION_API_KEY, CONFIG_DATABASE_ID);
                     organizeByChapter = config.organizeByChapter === "是";
                 }
-                yield (0, book_sync_1.syncSingleBook)(NOTION_API_KEY, DATABASE_ID, cookie, bookId, !fullSync, organizeByChapter);
+                yield (0, book_sync_1.syncSingleBook)(NOTION_API_KEY, DATABASE_ID, cookie, bookId, !fullSync, organizeByChapter, uploadOptions);
             }
             else {
                 console.log("请指定要同步的书籍ID (--bookId=xxx) 或使用 --all 同步所有书籍");

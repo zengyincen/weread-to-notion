@@ -15,6 +15,7 @@ import {
   checkBookExistsInNotion,
 } from "../../api/notion/services";
 import { getBookInfo } from "../../api/weread/services";
+import { UploadOptions } from "../../utils/image-upload";
 
 /**
  * 同步书籍内容（划线和想法）到Notion
@@ -146,7 +147,8 @@ export async function syncSingleBook(
   cookie: string,
   bookId: string,
   useIncremental: boolean = true,
-  organizeByChapter: boolean = false
+  organizeByChapter: boolean = false,
+  uploadOptions?: UploadOptions
 ): Promise<boolean> {
   console.log(
     `\n=== 开始${useIncremental ? "增量" : "全量"}同步书籍(ID: ${bookId}) ===`
@@ -178,7 +180,7 @@ export async function syncSingleBook(
       finalPageId = existingPageId;
     } else {
       // 写入书籍元数据到Notion
-      const writeResult = await writeBookToNotion(apiKey, databaseId, bookInfo);
+      const writeResult = await writeBookToNotion(apiKey, databaseId, bookInfo, uploadOptions);
 
       if (!writeResult.success || !writeResult.pageId) {
         console.error(`写入书籍 ${bookId} 到Notion失败`);

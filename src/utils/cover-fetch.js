@@ -1,9 +1,4 @@
 "use strict";
-/**
- * 书籍封面获取服务
- * 用于处理用户导入书籍的封面获取
- * 使用多个API源，按优先级排序
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -22,8 +17,14 @@ exports.searchBookCoverByGoogleBooks = searchBookCoverByGoogleBooks;
 exports.searchBookCoverByOpenLibrary = searchBookCoverByOpenLibrary;
 exports.searchBookCoverByISBN = searchBookCoverByISBN;
 exports.getBookCoverUrl = getBookCoverUrl;
+/**
+ * 书籍封面获取服务
+ * 用于处理用户导入书籍的封面获取
+ * 使用多个API源，按优先级排序
+ */
 const axios_1 = __importDefault(require("axios"));
 const cover_1 = require("./cover");
+const image_upload_1 = require("./image-upload");
 /**
  * 检测是否为用户导入的书籍（通过封面URL判断）
  */
@@ -64,11 +65,10 @@ function searchBookCoverByGoogleBooks(title, author, isbn) {
             });
             if (response.data && response.data.items && response.data.items.length > 0) {
                 for (const item of response.data.items) {
-                    if (item.volumeInfo &&
-                        item.volumeInfo.imageLinks) {
+                    if (item.volumeInfo && item.volumeInfo.imageLinks) {
                         let coverUrl = item.volumeInfo.imageLinks.thumbnail;
                         if (coverUrl) {
-                            coverUrl = coverUrl.replace(/&zoom=\d+/, "").replace(/zoom=\d+/, "");
+                            coverUrl = coverUrl.replace(/&zoom=\d+/g, "").replace(/zoom=\d+/g, "");
                             coverUrl = coverUrl.replace("zoom=1", "zoom=2");
                             console.log(`[Google Books] 找到封面: ${coverUrl}`);
                             return coverUrl;
@@ -80,7 +80,7 @@ function searchBookCoverByGoogleBooks(title, author, isbn) {
             return null;
         }
         catch (error) {
-            if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+            if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
                 console.warn(`[Google Books] 搜索超时: ${title}`);
             }
             else {
@@ -135,7 +135,7 @@ function searchBookCoverByOpenLibrary(title, author, isbn) {
             return null;
         }
         catch (error) {
-            if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+            if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
                 console.warn(`[Open Library] 搜索超时: ${title}`);
             }
             else {
@@ -176,7 +176,7 @@ function searchBookCoverByISBN(isbn) {
             return null;
         }
         catch (error) {
-            if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+            if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
                 console.warn(`[Open Library ISBN] 搜索超时: ${isbn}`);
             }
             else {
@@ -191,22 +191,32 @@ function searchBookCoverByISBN(isbn) {
  * 优先使用原有封面，如果不可用则尝试搜索
  * 按优先级尝试多个API源
  */
-function getBookCoverUrl(originalCoverUrl, bookTitle, bookAuthor, bookIsbn) {
+function getBookCoverUrl(originalCoverUrl, bookTitle, bookAuthor, bookIsbn, uploadOptions) {
     return __awaiter(this, void 0, void 0, function* () {
         const normalizedUrl = (0, cover_1.normalizeCoverUrl)(originalCoverUrl);
-        if (normalizedUrl) {
-            if (!isUserImportedBook(originalCoverUrl)) {
-                return normalizedUrl;
+        if (!normalizedUrl) {
+            console.warn(`《${bookTitle}》没有封面URL`);
+            return "";
+        }
+        if (!isUserImportedBook(originalCoverUrl)) {
+            return normalizedUrl;
+        }
+        // 对于用户导入书籍，首先尝试下载并上传到图床
+        if (uploadOptions) {
+            const processedCoverUrl = yield (0, image_upload_1.processImportedBookCover)(normalizedUrl, bookTitle, uploadOptions);
+            if (processedCoverUrl) {
+                return processedCoverUrl;
             }
-            console.log(`《${bookTitle}》封面不可用，尝试搜索...`);
-            const googleCover = yield searchBookCoverByGoogleBooks(bookTitle, bookAuthor, bookIsbn);
-            if (googleCover) {
-                return googleCover;
-            }
-            const openLibraryCover = yield searchBookCoverByOpenLibrary(bookTitle, bookAuthor, bookIsbn);
-            if (openLibraryCover) {
-                return openLibraryCover;
-            }
+        }
+        console.log(`《${bookTitle}》封面处理失败，尝试搜索替代封面...`);
+        // 图床上传失败，尝试通过搜索API获取替代封面
+        const googleCover = yield searchBookCoverByGoogleBooks(bookTitle, bookAuthor, bookIsbn);
+        if (googleCover) {
+            return googleCover;
+        }
+        const openLibraryCover = yield searchBookCoverByOpenLibrary(bookTitle, bookAuthor, bookIsbn);
+        if (openLibraryCover) {
+            return openLibraryCover;
         }
         console.warn(`无法为《${bookTitle}》获取封面`);
         return "";

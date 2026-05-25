@@ -6,8 +6,8 @@ import axios, { AxiosError } from "axios";
 import { NOTION_API_BASE_URL, NOTION_VERSION } from "../../config/constants";
 import { NotionBlockType } from "../../config/types";
 import { getNotionHeaders } from "../../utils/http";
-import { normalizeCoverUrl } from "../../utils/cover";
-import { getBookCoverUrl, isUserImportedBook } from "../../utils/cover-fetch";
+import { getBookCoverUrl } from "../../utils/cover-fetch";
+import { UploadOptions } from "../../utils/image-upload";
 import {
   BookProperties,
   NotionBlock,
@@ -63,147 +63,6 @@ export async function checkDatabaseProperties(
 
     // 如果无法检查，返回空数组以避免阻止同步
     return [];
-  }
-}
-
-/**
- * 获取书籍页面现有的封面URL
- */
-export async function getBookCoverFromNotion(
-  apiKey: string,
-  pageId: string
-): Promise<string | null> {
-  try {
-    const headers = getNotionHeaders(apiKey, NOTION_VERSION);
-
-    // 获取页面详情
-    const response = await axios.get(
-      `${NOTION_API_BASE_URL}/pages/${pageId}`,
-      { headers }
-    );
-
-    // 提取封面属性
-    const properties = response.data.properties;
-    if (properties && properties.封面) {
-      const coverFiles = properties.封面.files;
-      if (coverFiles && coverFiles.length > 0) {
-        const coverFile = coverFiles[0];
-        if (coverFile.type === "external") {
-          return coverFile.external?.url || null;
-        } else if (coverFile.type === "file") {
-          return coverFile.file?.url || null;
-        }
-      }
-    }
-
-    return null;
-  } catch (error: any) {
-    console.error(`获取书籍封面失败: ${error.message}`);
-    return null;
-  }
-}
-
-/**
- * 检测并更新书籍封面
- * 如果现有封面是用户导入书籍的 _parsecover 格式，尝试从 Open Library 获取新封面
- * @returns 是否进行了封面更新
- */
-export async function detectAndUpdateBookCover(
-  apiKey: string,
-  pageId: string,
-  bookTitle: string,
-  bookAuthor: string,
-  bookIsbn?: string
-): Promise<boolean> {
-  try {
-    // 1. 获取现有的封面
-    const existingCover = await getBookCoverFromNotion(apiKey, pageId);
-
-    if (!existingCover) {
-      console.log(`《${bookTitle}》没有封面，尝试搜索...`);
-      // 如果没有封面，尝试获取
-      const newCoverUrl = await getBookCoverUrl(
-        existingCover || "",
-        bookTitle,
-        bookAuthor,
-        bookIsbn
-      );
-
-      if (newCoverUrl) {
-        // 更新封面
-        await updateBookCover(apiKey, pageId, bookTitle, newCoverUrl);
-        return true;
-      }
-      return false;
-    }
-
-    // 2. 检查现有封面是否为用户导入书籍的格式
-    if (!isUserImportedBook(existingCover)) {
-      console.log(`《${bookTitle}》封面正常，无需更新`);
-      return false;
-    }
-
-    console.log(`《${bookTitle}》封面为用户导入格式，正在搜索新封面...`);
-
-    // 3. 尝试从 Open Library 获取新封面
-    const newCoverUrl = await getBookCoverUrl(
-      existingCover,
-      bookTitle,
-      bookAuthor,
-      bookIsbn
-    );
-
-    if (!newCoverUrl) {
-      console.warn(`无法为《${bookTitle}》找到合适的封面`);
-      return false;
-    }
-
-    // 4. 更新封面
-    await updateBookCover(apiKey, pageId, bookTitle, newCoverUrl);
-    return true;
-  } catch (error: any) {
-    console.error(`检测并更新封面失败: ${error.message}`);
-    return false;
-  }
-}
-
-/**
- * 更新书籍的封面
- */
-async function updateBookCover(
-  apiKey: string,
-  pageId: string,
-  bookTitle: string,
-  coverUrl: string
-): Promise<boolean> {
-  try {
-    const headers = getNotionHeaders(apiKey, NOTION_VERSION);
-
-    const response = await axios.patch(
-      `${NOTION_API_BASE_URL}/pages/${pageId}`,
-      {
-        properties: {
-          封面: {
-            files: [
-              {
-                type: "external",
-                name: `${bookTitle}-封面`,
-                external: {
-                  url: coverUrl,
-                },
-              },
-            ],
-          },
-        },
-      },
-      { headers }
-    );
-
-    console.log(`✅ 《${bookTitle}》封面已更新: ${coverUrl}`);
-    return true;
-  } catch (error: any) {
-    console.error(`更新封面失败: ${error.message}`);
-    return false;
   }
 }
 
@@ -288,7 +147,8 @@ export async function checkBookExistsInNotion(
 export async function writeBookToNotion(
   apiKey: string,
   databaseId: string,
-  bookData: any
+  bookData: any,
+  uploadOptions?: UploadOptions
 ): Promise<BookWriteResult> {
   try {
     console.log(`\n写入书籍《${bookData.title}》到Notion...`);
@@ -302,7 +162,12 @@ export async function writeBookToNotion(
     );
     if (existCheck.exists && existCheck.pageId) {
       console.log(`书籍已存在，将更新现有页面: ${existCheck.pageId}`);
-      const updateResult = await updateBookInNotion(apiKey, existCheck.pageId, bookData);
+      const updateResult = await updateBookInNotion(
+        apiKey,
+        existCheck.pageId,
+        bookData,
+        uploadOptions
+      );
       if (updateResult) {
         console.log(`成功更新书籍《${bookData.title}》`);
       } else {
@@ -316,15 +181,18 @@ export async function writeBookToNotion(
 
     // 从bookData中提取译者信息 (通常不在基本元数据中，可能需要单独处理)
     const translator = bookData.translator || "";
-    const coverUrl = await getBookCoverUrl(
+    
+    // 处理封面
+    const processedCoverUrl = await getBookCoverUrl(
       bookData.cover,
       bookData.title,
-      bookData.author || "未知作者",
-      bookData.isbn
+      bookData.author || "",
+      bookData.isbn || "",
+      uploadOptions
     );
 
     // 构建要写入的数据
-    const data: any = {
+    const data = {
       parent: {
         database_id: databaseId,
       },
@@ -361,6 +229,22 @@ export async function writeBookToNotion(
               },
             },
           ],
+        },
+        封面: {
+          files: (() => {
+            if (!processedCoverUrl) {
+              return [];
+            }
+            return [
+              {
+                type: "external",
+                name: `${bookData.title}-封面`,
+                external: {
+                  url: processedCoverUrl,
+                },
+              },
+            ];
+          })(),
         },
         // ISBN是rich_text类型
         ISBN: {
@@ -446,21 +330,6 @@ export async function writeBookToNotion(
         },
       },
     };
-
-    // 添加封面属性（如果有封面URL）
-    if (coverUrl) {
-      data.properties.封面 = {
-        files: [
-          {
-            type: "external",
-            name: `${bookData.title}-封面`,
-            external: {
-              url: coverUrl,
-            },
-          },
-        ],
-      };
-    }
     // 发送请求创建页面
     const response = await axios.post(`${NOTION_API_BASE_URL}/pages`, data, {
       headers,
@@ -490,7 +359,8 @@ export async function writeBookToNotion(
 export async function updateBookInNotion(
   apiKey: string,
   pageId: string,
-  bookData: any
+  bookData: any,
+  uploadOptions?: UploadOptions
 ): Promise<boolean> {
   try {
     console.log(`\n更新书籍《${bookData.title}》的属性...`);
@@ -498,11 +368,14 @@ export async function updateBookInNotion(
     const headers = getNotionHeaders(apiKey, NOTION_VERSION);
 
     const translator = bookData.translator || "";
-    const coverUrl = await getBookCoverUrl(
+    
+    // 处理封面
+    const processedCoverUrl = await getBookCoverUrl(
       bookData.cover,
       bookData.title,
-      bookData.author || "未知作者",
-      bookData.isbn
+      bookData.author || "",
+      bookData.isbn || "",
+      uploadOptions
     );
 
     const properties: any = {
@@ -612,14 +485,14 @@ export async function updateBookInNotion(
       },
     };
 
-    if (coverUrl) {
+    if (processedCoverUrl) {
       properties.封面 = {
         files: [
           {
             type: "external",
             name: `${bookData.title}-封面`,
             external: {
-              url: coverUrl,
+              url: processedCoverUrl,
             },
           },
         ],

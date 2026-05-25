@@ -11,6 +11,7 @@ import { getBrowserCookie } from "./utils/cookie";
 import { refreshSession } from "./api/weread/services";
 import { checkAndMigrateIfNeeded } from "./core/migration";
 import { loadLibraryConfig } from "./api/notion/config-service";
+import { UploadOptions } from "./utils/image-upload";
 
 // 环境变量文件路径
 const ENV_FILE_PATH = ".env";
@@ -72,6 +73,14 @@ async function main() {
     cookie = await refreshSession(cookie);
     console.log("会话已刷新");
 
+    // 创建封面上传配置
+    const uploadOptions: UploadOptions = {
+      wereadCookie: cookie,
+      imgurClientId: process.env.IMGUR_CLIENT_ID,
+      githubToken: process.env.GITHUB_TOKEN,
+      githubRepository: process.env.GITHUB_REPOSITORY,
+    };
+
     if (syncAll) {
       // 同步所有书籍
       if (CONFIG_DATABASE_ID) {
@@ -89,11 +98,12 @@ async function main() {
           DATABASE_ID,
           cookie,
           useIncremental,
-          CONFIG_DATABASE_ID
+          CONFIG_DATABASE_ID,
+          uploadOptions
         );
       } else {
         console.log("未配置CONFIG_DATABASE_ID，使用默认同步（所有书籍）");
-        await syncAllBooks(NOTION_API_KEY, DATABASE_ID, cookie, !fullSync);
+        await syncAllBooks(NOTION_API_KEY, DATABASE_ID, cookie, !fullSync, uploadOptions);
       }
     } else if (bookId) {
       // 同步单本书籍
@@ -111,7 +121,8 @@ async function main() {
         cookie,
         bookId,
         !fullSync,
-        organizeByChapter
+        organizeByChapter,
+        uploadOptions
       );
     } else {
       console.log(

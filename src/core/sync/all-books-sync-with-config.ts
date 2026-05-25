@@ -13,7 +13,6 @@ import {
 import {
   checkBookExistsInNotion,
   writeBookToNotion,
-  detectAndUpdateBookCover,
 } from "../../api/notion/services";
 import {
   loadLibraryConfig,
@@ -22,6 +21,7 @@ import {
 } from "../../api/notion/config-service";
 import { filterBooksByConfig, showFilterStats } from "../book-filter";
 import { LibraryConfig } from "../../config/types";
+import { UploadOptions } from "../../utils/image-upload";
 
 /**
  * 同步所有书籍到Notion（带配置过滤）
@@ -31,7 +31,8 @@ export async function syncAllBooksWithConfig(
   databaseId: string,
   cookie: string,
   useIncremental: boolean = true,
-  configDatabaseId?: string
+  configDatabaseId?: string,
+  uploadOptions?: UploadOptions
 ): Promise<void> {
   console.log(
     `\n=== 开始${useIncremental ? "增量" : "全量"}同步所有书籍（带配置过滤）===`
@@ -114,20 +115,6 @@ export async function syncAllBooksWithConfig(
       if (exists && existingPageId) {
         console.log(`《${book.title}》已存在于Notion，将更新现有记录`);
         finalPageId = existingPageId;
-
-        // 获取书籍详细信息（包括ISBN）
-        console.log(`获取《${book.title}》的详细信息以检查封面...`);
-        const detailedBookInfo = await getBookInfo(cookie, book.bookId);
-
-        // 检测并更新封面（如果需要）
-        const bookIsbn = detailedBookInfo?.isbn || book.isbn || "";
-        await detectAndUpdateBookCover(
-          apiKey,
-          existingPageId,
-          book.title,
-          book.author || "未知作者",
-          bookIsbn
-        );
       } else {
         // 获取书籍详细信息（包括ISBN和出版社）
         console.log(`获取《${book.title}》的详细信息...`);
@@ -152,7 +139,8 @@ export async function syncAllBooksWithConfig(
         const writeResult = await writeBookToNotion(
           apiKey,
           databaseId,
-          enhancedBook
+          enhancedBook,
+          uploadOptions
         );
 
         if (!writeResult.success || !writeResult.pageId) {

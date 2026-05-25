@@ -22,7 +22,7 @@ const services_2 = require("../../api/notion/services");
  * 同步所有书籍到Notion
  */
 function syncAllBooks(apiKey_1, databaseId_1, cookie_1) {
-    return __awaiter(this, arguments, void 0, function* (apiKey, databaseId, cookie, useIncremental = true) {
+    return __awaiter(this, arguments, void 0, function* (apiKey, databaseId, cookie, useIncremental = true, uploadOptions) {
         console.log(`\n=== 开始${useIncremental ? "增量" : "全量"}同步所有书籍 ===`);
         try {
             // 获取书架中的书籍
@@ -59,7 +59,7 @@ function syncAllBooks(apiKey_1, databaseId_1, cookie_1) {
                         intro: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.intro) || book.intro || "", publishTime: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.publishTime) || book.publishTime || "" });
                     console.log(`获取到ISBN: ${enhancedBook.isbn}, 出版社: ${enhancedBook.publisher}`);
                     // 写入书籍元数据到Notion
-                    const writeResult = yield (0, services_2.writeBookToNotion)(apiKey, databaseId, enhancedBook);
+                    const writeResult = yield (0, services_2.writeBookToNotion)(apiKey, databaseId, enhancedBook, uploadOptions);
                     if (!writeResult.success || !writeResult.pageId) {
                         failCount++;
                         console.log(`《${book.title}》同步失败`);
