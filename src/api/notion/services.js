@@ -85,6 +85,7 @@ function formatReadingTime(seconds) {
  */
 function checkBookExistsInNotion(apiKey, databaseId, bookTitle, bookAuthor) {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         try {
             console.log(`检查书籍《${bookTitle}》是否已存在于Notion数据库...`);
             // 设置请求头
@@ -113,7 +114,19 @@ function checkBookExistsInNotion(apiKey, databaseId, bookTitle, bookAuthor) {
             const results = response.data.results;
             if (results && results.length > 0) {
                 console.log(`书籍已存在于Notion，页面ID: ${results[0].id}`);
-                return { exists: true, pageId: results[0].id };
+                // 提取当前封面URL
+                let coverUrl;
+                const coverProperty = (_a = results[0].properties) === null || _a === void 0 ? void 0 : _a.封面;
+                if (coverProperty && coverProperty.files && coverProperty.files.length > 0) {
+                    const firstFile = coverProperty.files[0];
+                    if (firstFile.external && firstFile.external.url) {
+                        coverUrl = firstFile.external.url;
+                    }
+                    else if (firstFile.file && firstFile.file.url) {
+                        coverUrl = firstFile.file.url;
+                    }
+                }
+                return { exists: true, pageId: results[0].id, coverUrl };
             }
             console.log("书籍尚未添加到Notion");
             return { exists: false };

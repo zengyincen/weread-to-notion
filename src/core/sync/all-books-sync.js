@@ -18,6 +18,7 @@ const book_sync_1 = require("./book-sync");
 const file_1 = require("../../utils/file");
 const services_1 = require("../../api/weread/services");
 const services_2 = require("../../api/notion/services");
+const cover_fetch_1 = require("../../utils/cover-fetch");
 /**
  * 同步所有书籍到Notion
  */
@@ -41,10 +42,18 @@ function syncAllBooks(apiKey_1, databaseId_1, cookie_1) {
                 const book = mergedBooks[i];
                 console.log(`\n[${i + 1}/${mergedBooks.length}] 同步《${book.title}》...`);
                 // 检查书籍是否已存在于Notion
-                const { exists, pageId: existingPageId } = yield (0, services_2.checkBookExistsInNotion)(apiKey, databaseId, book.title, book.author);
+                const { exists, pageId: existingPageId, coverUrl: existingCoverUrl } = yield (0, services_2.checkBookExistsInNotion)(apiKey, databaseId, book.title, book.author);
                 let finalPageId;
                 if (exists && existingPageId) {
-                    console.log(`《${book.title}》已存在于Notion，将更新现有记录`);
+                    console.log(`《${book.title}》已存在于Notion`);
+                    // 检查现有封面是否是用户导入书籍的格式
+                    if (existingCoverUrl && (0, cover_fetch_1.isUserImportedBook)(existingCoverUrl)) {
+                        console.log(`检测到封面是用户导入格式，需要更新...`);
+                        // 获取书籍详细信息（包括ISBN和出版社）
+                        const detailedBookInfo = yield (0, services_1.getBookInfo)(cookie, book.bookId);
+                        const enhancedBook = Object.assign(Object.assign({}, book), { isbn: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.isbn) || book.isbn || "", publisher: (detailedBookInfo === null || detailedBookInfo === void 0 ? void 0 : detailedBookInfo.publisher) || book.publisher || "", cover: existingCoverUrl });
+                        yield (0, services_2.updateBookInNotion)(apiKey, existingPageId, enhancedBook, uploadOptions);
+                    }
                     finalPageId = existingPageId;
                 }
                 else {

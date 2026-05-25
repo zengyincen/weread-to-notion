@@ -129,7 +129,20 @@ export async function checkBookExistsInNotion(
     const results = response.data.results;
     if (results && results.length > 0) {
       console.log(`书籍已存在于Notion，页面ID: ${results[0].id}`);
-      return { exists: true, pageId: results[0].id };
+      
+      // 提取当前封面URL
+      let coverUrl: string | undefined;
+      const coverProperty = results[0].properties?.封面;
+      if (coverProperty && coverProperty.files && coverProperty.files.length > 0) {
+        const firstFile = coverProperty.files[0];
+        if (firstFile.external && firstFile.external.url) {
+          coverUrl = firstFile.external.url;
+        } else if (firstFile.file && firstFile.file.url) {
+          coverUrl = firstFile.file.url;
+        }
+      }
+      
+      return { exists: true, pageId: results[0].id, coverUrl };
     }
 
     console.log("书籍尚未添加到Notion");

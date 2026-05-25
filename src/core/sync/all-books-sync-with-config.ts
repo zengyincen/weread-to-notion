@@ -13,6 +13,7 @@ import {
 import {
   checkBookExistsInNotion,
   writeBookToNotion,
+  updateBookInNotion,
 } from "../../api/notion/services";
 import {
   loadLibraryConfig,
@@ -22,6 +23,7 @@ import {
 import { filterBooksByConfig, showFilterStats } from "../book-filter";
 import { LibraryConfig } from "../../config/types";
 import { UploadOptions } from "../../utils/image-upload";
+import { isUserImportedBook } from "../../utils/cover-fetch";
 
 /**
  * 同步所有书籍到Notion（带配置过滤）
@@ -103,7 +105,7 @@ export async function syncAllBooksWithConfig(
         `\n[${i + 1}/${booksToSync.length}] 同步《${book.title}》...`
       );
       // 检查书籍是否已存在于Notion
-      const { exists, pageId: existingPageId } = await checkBookExistsInNotion(
+      const { exists, pageId: existingPageId, coverUrl: existingCoverUrl } = await checkBookExistsInNotion(
         apiKey,
         databaseId,
         book.title,
@@ -113,7 +115,22 @@ export async function syncAllBooksWithConfig(
       let finalPageId: string;
 
       if (exists && existingPageId) {
-        console.log(`《${book.title}》已存在于Notion，将更新现有记录`);
+        console.log(`《${book.title}》已存在于Notion`);
+        
+        // 检查现有封面是否是用户导入书籍的格式
+        if (existingCoverUrl && isUserImportedBook(existingCoverUrl)) {
+          console.log(`检测到封面是用户导入格式，需要更新...`);
+          // 获取书籍详细信息（包括ISBN和出版社）
+          const detailedBookInfo = await getBookInfo(cookie, book.bookId);
+          const enhancedBook = {
+            ...book,
+            isbn: detailedBookInfo?.isbn || book.isbn || "",
+            publisher: detailedBookInfo?.publisher || book.publisher || "",
+            cover: existingCoverUrl,
+          };
+          await updateBookInNotion(apiKey, existingPageId, enhancedBook, uploadOptions);
+        }
+        
         finalPageId = existingPageId;
       } else {
         // 获取书籍详细信息（包括ISBN和出版社）

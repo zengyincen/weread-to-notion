@@ -63,6 +63,7 @@ export interface NotionBlocksResponse {
 export interface BookExistsResult {
   exists: boolean;
   pageId?: string;
+  coverUrl?: string;
 }
 
 /**
