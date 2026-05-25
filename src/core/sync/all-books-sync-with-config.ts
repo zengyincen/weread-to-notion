@@ -13,6 +13,7 @@ import {
 import {
   checkBookExistsInNotion,
   writeBookToNotion,
+  detectAndUpdateBookCover,
 } from "../../api/notion/services";
 import {
   loadLibraryConfig,
@@ -113,6 +114,20 @@ export async function syncAllBooksWithConfig(
       if (exists && existingPageId) {
         console.log(`《${book.title}》已存在于Notion，将更新现有记录`);
         finalPageId = existingPageId;
+
+        // 获取书籍详细信息（包括ISBN）
+        console.log(`获取《${book.title}》的详细信息以检查封面...`);
+        const detailedBookInfo = await getBookInfo(cookie, book.bookId);
+
+        // 检测并更新封面（如果需要）
+        const bookIsbn = detailedBookInfo?.isbn || book.isbn || "";
+        await detectAndUpdateBookCover(
+          apiKey,
+          existingPageId,
+          book.title,
+          book.author || "未知作者",
+          bookIsbn
+        );
       } else {
         // 获取书籍详细信息（包括ISBN和出版社）
         console.log(`获取《${book.title}》的详细信息...`);

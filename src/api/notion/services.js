@@ -16,6 +16,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkDatabaseProperties = checkDatabaseProperties;
+exports.getBookCoverFromNotion = getBookCoverFromNotion;
+exports.detectAndUpdateBookCover = detectAndUpdateBookCover;
 exports.checkBookExistsInNotion = checkBookExistsInNotion;
 exports.writeBookToNotion = writeBookToNotion;
 exports.updateBookInNotion = updateBookInNotion;
@@ -60,6 +62,112 @@ function checkDatabaseProperties(apiKey, databaseId, requiredProperties) {
             }
             // 如果无法检查，返回空数组以避免阻止同步
             return [];
+        }
+    });
+}
+/**
+ * 获取书籍页面现有的封面URL
+ */
+function getBookCoverFromNotion(apiKey, pageId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b;
+        try {
+            const headers = (0, http_1.getNotionHeaders)(apiKey, constants_1.NOTION_VERSION);
+            // 获取页面详情
+            const response = yield axios_1.default.get(`${constants_1.NOTION_API_BASE_URL}/pages/${pageId}`, { headers });
+            // 提取封面属性
+            const properties = response.data.properties;
+            if (properties && properties.封面) {
+                const coverFiles = properties.封面.files;
+                if (coverFiles && coverFiles.length > 0) {
+                    const coverFile = coverFiles[0];
+                    if (coverFile.type === "external") {
+                        return ((_a = coverFile.external) === null || _a === void 0 ? void 0 : _a.url) || null;
+                    }
+                    else if (coverFile.type === "file") {
+                        return ((_b = coverFile.file) === null || _b === void 0 ? void 0 : _b.url) || null;
+                    }
+                }
+            }
+            return null;
+        }
+        catch (error) {
+            console.error(`获取书籍封面失败: ${error.message}`);
+            return null;
+        }
+    });
+}
+/**
+ * 检测并更新书籍封面
+ * 如果现有封面是用户导入书籍的 _parsecover 格式，尝试从 Open Library 获取新封面
+ * @returns 是否进行了封面更新
+ */
+function detectAndUpdateBookCover(apiKey, pageId, bookTitle, bookAuthor, bookIsbn) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // 1. 获取现有的封面
+            const existingCover = yield getBookCoverFromNotion(apiKey, pageId);
+            if (!existingCover) {
+                console.log(`《${bookTitle}》没有封面，尝试搜索...`);
+                // 如果没有封面，尝试获取
+                const newCoverUrl = yield (0, cover_fetch_1.getBookCoverUrl)(existingCover || "", bookTitle, bookAuthor, bookIsbn);
+                if (newCoverUrl) {
+                    // 更新封面
+                    yield updateBookCover(apiKey, pageId, bookTitle, newCoverUrl);
+                    return true;
+                }
+                return false;
+            }
+            // 2. 检查现有封面是否为用户导入书籍的格式
+            if (!(0, cover_fetch_1.isUserImportedBook)(existingCover)) {
+                console.log(`《${bookTitle}》封面正常，无需更新`);
+                return false;
+            }
+            console.log(`《${bookTitle}》封面为用户导入格式，正在搜索新封面...`);
+            // 3. 尝试从 Open Library 获取新封面
+            const newCoverUrl = yield (0, cover_fetch_1.getBookCoverUrl)(existingCover, bookTitle, bookAuthor, bookIsbn);
+            if (!newCoverUrl) {
+                console.warn(`无法为《${bookTitle}》找到合适的封面`);
+                return false;
+            }
+            // 4. 更新封面
+            yield updateBookCover(apiKey, pageId, bookTitle, newCoverUrl);
+            return true;
+        }
+        catch (error) {
+            console.error(`检测并更新封面失败: ${error.message}`);
+            return false;
+        }
+    });
+}
+/**
+ * 更新书籍的封面
+ */
+function updateBookCover(apiKey, pageId, bookTitle, coverUrl) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const headers = (0, http_1.getNotionHeaders)(apiKey, constants_1.NOTION_VERSION);
+            const response = yield axios_1.default.patch(`${constants_1.NOTION_API_BASE_URL}/pages/${pageId}`, {
+                properties: {
+                    封面: {
+                        files: [
+                            {
+                                type: "external",
+                                name: `${bookTitle}-封面`,
+                                external: {
+                                    url: coverUrl,
+                                },
+                            },
+                        ],
+                    },
+                },
+            }, { headers });
+            console.log(`✅ 《${bookTitle}》封面已更新: ${coverUrl}`);
+            return true;
+        }
+        catch (error) {
+            console.error(`更新封面失败: ${error.message}`);
+            return false;
         }
     });
 }
