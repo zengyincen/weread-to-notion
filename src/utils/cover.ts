@@ -6,11 +6,17 @@ import { WEREAD_BASE_URL } from "../config/constants";
 
 /**
  * 检查URL是否有效
+ * 接受所有有效的 HTTPS 链接，包括：
+ * - weread.qq.com
+ * - cdn.weread.qq.com
+ * - res.weread.qq.com
+ * - wfqqreader-*.image.myqcloud.com
+ * - 其他任何 HTTPS 开头的链接
  */
 function isValidUrl(url: string): boolean {
   try {
     const urlObj = new URL(url);
-    return urlObj.protocol === "https:" && urlObj.hostname.includes("weread");
+    return urlObj.protocol === "https:";
   } catch {
     return false;
   }
@@ -67,16 +73,11 @@ export function normalizeCoverUrl(coverUrl: string): string {
     return "";
   }
 
-  // 如果已经是完整的https URL，验证后返回
+  // 如果已经是完整的https URL，验证后直接返回
   if (trimmedUrl.startsWith("https://")) {
     if (isValidUrl(trimmedUrl)) {
       return trimmedUrl;
     }
-    // 检查是否是weread相关的有效URL
-    if (trimmedUrl.includes("weread.qq.com") || trimmedUrl.includes("qpic.cn")) {
-      return trimmedUrl;
-    }
-    // 其他https URL可能不是有效的封面
     console.warn(`无效的封面URL: ${trimmedUrl}`);
     return "";
   }
