@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "=== 测试1: 检测用户导入书籍 ==="
           node -e "
-            const { isUserImportedBook } = require('./dist/utils/cover-fetch');
+            const { isUserImportedBook } = require('./src/utils/cover-fetch');
 
             // 测试用例
             const testCases = [
