@@ -91,21 +91,39 @@ export async function uploadToImgur(
 }
 
 /**
+ * 解析 GitHub 仓库配置
+ * 支持格式：
+ * - owner/repo
+ * - owner/repo/folder/path
+ */
+function parseGitHubRepo(repoConfig: string): { owner: string; repo: string; folder: string } {
+  const parts = repoConfig.split("/");
+  if (parts.length >= 2) {
+    const owner = parts[0];
+    const repo = parts[1];
+    const folder = parts.length > 2 ? parts.slice(2).join("/") : "temp-covers";
+    return { owner, repo, folder };
+  }
+  throw new Error(`无效的仓库配置格式: ${repoConfig}`);
+}
+
+/**
  * 上传图片到 GitHub 仓库作为临时文件
- * 需要配置 GITHUB_TOKEN 和 GITHUB_REPOSITORY 环境变量
+ * 需要配置 GIT_TOKEN 和 GIT_REPO 环境变量
+ * GIT_REPO 支持格式: owner/repo 或 owner/repo/folder/path
  */
 export async function uploadToGitHub(
   imageBuffer: Buffer,
   token: string,
-  owner: string,
-  repo: string,
+  repoConfig: string,
   fileName: string
 ): Promise<UploadResult> {
   try {
-    console.log(`正在上传图片到 GitHub 仓库: ${owner}/${repo}`);
+    const { owner, repo, folder } = parseGitHubRepo(repoConfig);
+    console.log(`正在上传图片到 GitHub 仓库: ${owner}/${repo}, 文件夹: ${folder}`);
     const base64Image = imageBuffer.toString("base64");
     const timestamp = Date.now();
-    const path = `temp-covers/${timestamp}_${fileName}`;
+    const path = `${folder}/${timestamp}_${fileName}`;
     
     const response = await axios.put(
       `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
@@ -171,15 +189,13 @@ export async function processImportedBookCover(
     options.githubToken &&
     options.githubRepository
   ) {
-    const [owner, repo] = options.githubRepository.split("/");
     const sanitizedTitle = bookTitle
       .replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "_")
       .substring(0, 50);
     uploadResult = await uploadToGitHub(
       imageBuffer,
       options.githubToken,
-      owner,
-      repo,
+      options.githubRepository,
       `${sanitizedTitle}.jpg`
     );
   }

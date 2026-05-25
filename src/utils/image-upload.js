@@ -83,16 +83,34 @@ function uploadToImgur(imageBuffer, clientId) {
     });
 }
 /**
- * 上传图片到 GitHub 仓库作为临时文件
- * 需要配置 GITHUB_TOKEN 和 GITHUB_REPOSITORY 环境变量
+ * 解析 GitHub 仓库配置
+ * 支持格式：
+ * - owner/repo
+ * - owner/repo/folder/path
  */
-function uploadToGitHub(imageBuffer, token, owner, repo, fileName) {
+function parseGitHubRepo(repoConfig) {
+    const parts = repoConfig.split("/");
+    if (parts.length >= 2) {
+        const owner = parts[0];
+        const repo = parts[1];
+        const folder = parts.length > 2 ? parts.slice(2).join("/") : "temp-covers";
+        return { owner, repo, folder };
+    }
+    throw new Error(`无效的仓库配置格式: ${repoConfig}`);
+}
+/**
+ * 上传图片到 GitHub 仓库作为临时文件
+ * 需要配置 GIT_TOKEN 和 GIT_REPO 环境变量
+ * GIT_REPO 支持格式: owner/repo 或 owner/repo/folder/path
+ */
+function uploadToGitHub(imageBuffer, token, repoConfig, fileName) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log(`正在上传图片到 GitHub 仓库: ${owner}/${repo}`);
+            const { owner, repo, folder } = parseGitHubRepo(repoConfig);
+            console.log(`正在上传图片到 GitHub 仓库: ${owner}/${repo}, 文件夹: ${folder}`);
             const base64Image = imageBuffer.toString("base64");
             const timestamp = Date.now();
-            const path = `temp-covers/${timestamp}_${fileName}`;
+            const path = `${folder}/${timestamp}_${fileName}`;
             const response = yield axios_1.default.put(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
                 message: "Add book cover",
                 content: base64Image,
@@ -144,11 +162,10 @@ function processImportedBookCover(coverUrl, bookTitle, options) {
         if (!(uploadResult === null || uploadResult === void 0 ? void 0 : uploadResult.success) &&
             options.githubToken &&
             options.githubRepository) {
-            const [owner, repo] = options.githubRepository.split("/");
             const sanitizedTitle = bookTitle
                 .replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "_")
                 .substring(0, 50);
-            uploadResult = yield uploadToGitHub(imageBuffer, options.githubToken, owner, repo, `${sanitizedTitle}.jpg`);
+            uploadResult = yield uploadToGitHub(imageBuffer, options.githubToken, options.githubRepository, `${sanitizedTitle}.jpg`);
         }
         if ((uploadResult === null || uploadResult === void 0 ? void 0 : uploadResult.success) && uploadResult.url) {
             console.log(`✓ 封面处理完成: ${uploadResult.url}`);
