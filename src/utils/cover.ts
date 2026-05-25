@@ -29,6 +29,7 @@ export function isCoverNeedUpdate(coverUrl: string | undefined): boolean {
   if (!coverUrl || coverUrl.trim() === "") {
     return true;
   }
+  // 只有包含 _parsecover 的链接才需要处理
   return isUserImportedBookUrl(coverUrl);
 }
 
