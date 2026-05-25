@@ -7,6 +7,10 @@ on:
   # 允许从Actions标签手动触发
   workflow_dispatch:
 
+env:
+  # 强制使用 Node.js 24 以避免 Node.js 20 弃用警告
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # 封面获取功能测试
   test-cover-fetch:
@@ -22,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
           cache-dependency-path: package-lock.json
 
@@ -176,7 +180,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
           cache-dependency-path: main-branch/package-lock.json
 
