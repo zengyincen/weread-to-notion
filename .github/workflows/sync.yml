@@ -97,6 +97,10 @@ jobs:
           DATABASE_ID: ${{ secrets.DATABASE_ID }}
           NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
           CONFIG_DATABASE_ID: ${{ secrets.CONFIG_DATABASE_ID }}
+          # 用户导入书籍封面处理配置
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
 
       # 将更新的同步状态保存到data分支
       - name: Update sync state in data branch
