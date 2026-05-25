@@ -151,7 +151,7 @@ export async function searchBookCoverByOpenLibrary(
 /**
  * 通过 ISBN 搜索书籍封面 (Open Library)
  */
-async function searchBookCoverByISBN(
+export async function searchBookCoverByISBN(
   isbn: string
 ): Promise<string | null> {
   try {

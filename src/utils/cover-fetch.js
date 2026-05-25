@@ -20,6 +20,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isUserImportedBook = isUserImportedBook;
 exports.searchBookCoverByGoogleBooks = searchBookCoverByGoogleBooks;
 exports.searchBookCoverByOpenLibrary = searchBookCoverByOpenLibrary;
+exports.searchBookCoverByISBN = searchBookCoverByISBN;
 exports.getBookCoverUrl = getBookCoverUrl;
 const axios_1 = __importDefault(require("axios"));
 const cover_1 = require("./cover");

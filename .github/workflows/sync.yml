@@ -80,26 +80,45 @@ jobs:
         run: |
           echo "=== 测试2: 通过书名和作者搜索封面 ==="
           npx ts-node -e "
-            import { searchBookCover } from './src/utils/cover-fetch';
+            import { searchBookCoverByGoogleBooks, searchBookCoverByOpenLibrary } from './src/utils/cover-fetch';
 
             (async () => {
               console.log('开始测试书名和作者搜索功能...');
 
               const testBooks = [
-                { title: 'Clean Code', author: 'Robert C. Martin' }
+                { title: 'Clean Code', author: 'Robert C. Martin' },
+                { title: '活着', author: '余华' },
+                { title: '死亡赋格：保罗·策兰诗精选', author: '保罗·策兰' }
               ];
 
               for (const book of testBooks) {
+                console.log('========================================');
                 console.log('搜索书籍: 《' + book.title + '》 作者: ' + book.author);
+                
+                // 先尝试 Google Books
+                console.log('[1] 尝试 Google Books...');
                 try {
-                  const coverUrl = await searchBookCover(book.title, book.author);
-                  if (coverUrl) {
-                    console.log('✅ 找到封面: ' + coverUrl);
+                  const googleCover = await searchBookCoverByGoogleBooks(book.title, book.author);
+                  if (googleCover) {
+                    console.log('✅ Google Books 找到封面: ' + googleCover);
                   } else {
-                    console.log('⚠️  未找到封面（网络问题或书籍不在数据库中）');
+                    console.log('⚠️  Google Books 未找到');
                   }
                 } catch (error: any) {
-                  console.log('⚠️  搜索失败: ' + error.message);
+                  console.log('⚠️  Google Books 搜索失败: ' + error.message);
+                }
+                
+                // 再尝试 Open Library
+                console.log('[2] 尝试 Open Library...');
+                try {
+                  const olCover = await searchBookCoverByOpenLibrary(book.title, book.author);
+                  if (olCover) {
+                    console.log('✅ Open Library 找到封面: ' + olCover);
+                  } else {
+                    console.log('⚠️  Open Library 未找到');
+                  }
+                } catch (error: any) {
+                  console.log('⚠️  Open Library 搜索失败: ' + error.message);
                 }
               }
             })();
