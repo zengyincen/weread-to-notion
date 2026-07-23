@@ -75,12 +75,12 @@ function main() {
             year,
             title: `${displayName} · 阅读热力图`,
             theme: {
-                background: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_BACKGROUND_COLOR, "#FFFFFF"),
-                empty: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_EMPTY_COLOR, "#EBEDF0"),
-                low: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_LOW_COLOR, "#ACE7AE"),
-                medium: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_MEDIUM_COLOR, "#69C16E"),
-                high: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_HIGH_COLOR, "#549F57"),
-                text: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_TEXT_COLOR, "#24292F"),
+                background: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_BACKGROUND_COLOR, "#F5F5F7"),
+                empty: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_EMPTY_COLOR, "#E5E5EA"),
+                low: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_LOW_COLOR, "#D1F2D8"),
+                medium: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_MEDIUM_COLOR, "#7EDC8F"),
+                high: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_HIGH_COLOR, "#34C759"),
+                text: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_TEXT_COLOR, "#1D1D1F"),
             },
         });
         yield fs_1.promises.mkdir(path.dirname(outputPath), { recursive: true });

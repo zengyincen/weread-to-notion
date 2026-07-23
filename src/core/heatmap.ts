@@ -255,17 +255,21 @@ export function renderHeatmapSvg(
   const lowThresholdMinutes = options.lowThresholdMinutes ?? 15;
   const mediumThresholdMinutes = options.mediumThresholdMinutes ?? 60;
   const cellSize = 12;
-  const gap = 3;
-  const left = 46;
-  const top = 72;
-  const bottom = 34;
+  const columnGap = 3;
+  const rowGap = 7;
+  const columnStep = cellSize + columnGap;
+  const rowStep = cellSize + rowGap;
+  const left = 62;
+  const top = 96;
+  const bottom = 52;
   const firstDay = new Date(Date.UTC(year, 0, 1));
   const lastDay = new Date(Date.UTC(year, 11, 31));
   const dayCount =
     Math.floor((lastDay.getTime() - firstDay.getTime()) / 86_400_000) + 1;
   const weekCount = Math.ceil((firstDay.getUTCDay() + dayCount) / 7);
-  const width = left + weekCount * (cellSize + gap) + 24;
-  const height = top + 7 * (cellSize + gap) + bottom;
+  const gridHeight = 7 * cellSize + 6 * rowGap;
+  const width = left + weekCount * columnStep + 28;
+  const height = top + gridHeight + bottom;
   const totalSeconds = Object.values(dailyReadTimes).reduce(
     (sum, seconds) => sum + seconds,
     0
@@ -297,9 +301,7 @@ export function renderHeatmapSvg(
     );
     const week = Math.floor((firstDay.getUTCDay() + offset) / 7);
     monthLabels.push(
-      `<text x="${left + week * (cellSize + gap)}" y="58">${
-        monthNames[month]
-      }</text>`
+      `<text x="${left + week * columnStep}" y="80">${monthNames[month]}</text>`
     );
   }
 
@@ -317,21 +319,20 @@ export function renderHeatmapSvg(
     );
     const tooltip = `${dateKey} · ${formatDuration(seconds)}`;
     cells.push(
-      `<rect x="${left + week * (cellSize + gap)}" y="${
-        top + weekday * (cellSize + gap)
-      }" width="${cellSize}" height="${cellSize}" rx="2" fill="${
+      `<rect x="${left + week * columnStep}" y="${
+        top + weekday * rowStep
+      }" width="${cellSize}" height="${cellSize}" rx="3" fill="${
         colors[level]
       }"><title>${escapeXml(tooltip)}</title></rect>`
     );
   }
 
-  const legendX = width - 146;
+  const legendY = height - 36;
+  const legendX = width - 158;
   const legend = colors
     .map(
       (color, index) =>
-        `<rect x="${legendX + index * 17}" y="${
-          height - 22
-        }" width="12" height="12" rx="2" fill="${color}"/>`
+        `<rect x="${legendX + index * 18}" y="${legendY}" width="12" height="12" rx="3" fill="${color}"/>`
     )
     .join("");
 
@@ -342,29 +343,37 @@ export function renderHeatmapSvg(
     `<desc id="description">${year} 年阅读时长热力图，共 ${activeDays} 个阅读日，累计 ${escapeXml(
       formatDuration(totalSeconds)
     )}</desc>`,
-    `<rect width="100%" height="100%" rx="10" fill="${theme.background}"/>`,
-    `<g fill="${theme.text}" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif">`,
-    `<text x="18" y="28" font-size="16" font-weight="600">${escapeXml(
+    '<defs><filter id="card-shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/></filter></defs>',
+    `<rect width="100%" height="100%" rx="24" fill="${theme.background}"/>`,
+    `<rect x="10" y="10" width="${width - 20}" height="${
+      height - 20
+    }" rx="20" fill="#FFFFFF" stroke="#E8E8ED" stroke-width="1" filter="url(#card-shadow)"/>`,
+    `<g fill="${theme.text}" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue','Noto Sans SC',sans-serif">`,
+    `<text x="30" y="40" font-size="20" font-weight="600" letter-spacing="-0.35">${escapeXml(
       title
     )}</text>`,
-    `<text x="18" y="47" font-size="11" opacity="0.72">${year} · ${activeDays} 个阅读日 · ${escapeXml(
+    `<text x="30" y="62" font-size="12" fill="#6E6E73">${activeDays} 个阅读日 · 累计 ${escapeXml(
       formatDuration(totalSeconds)
     )}</text>`,
-    `<g font-size="10" opacity="0.72">${monthLabels.join("")}</g>`,
-    `<g font-size="10" opacity="0.72"><text x="18" y="${
-      top + 1 * (cellSize + gap) + 10
-    }">一</text><text x="18" y="${
-      top + 3 * (cellSize + gap) + 10
-    }">三</text><text x="18" y="${
-      top + 5 * (cellSize + gap) + 10
+    `<rect x="${width - 96}" y="25" width="58" height="26" rx="13" fill="#F5F5F7"/>`,
+    `<text x="${width - 67}" y="43" text-anchor="middle" font-size="12" font-weight="600" fill="#6E6E73">${year}</text>`,
+    `<g font-size="10" font-weight="500" fill="#86868B">${monthLabels.join(
+      ""
+    )}</g>`,
+    `<g font-size="10" font-weight="500" fill="#86868B"><text x="32" y="${
+      top + 1 * rowStep + 10
+    }">一</text><text x="32" y="${
+      top + 3 * rowStep + 10
+    }">三</text><text x="32" y="${
+      top + 5 * rowStep + 10
     }">五</text></g>`,
     "</g>",
     `<g>${cells.join("")}</g>`,
-    `<g fill="${theme.text}" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif" font-size="10" opacity="0.72"><text x="${
-      legendX - 24
-    }" y="${height - 12}">少</text>${legend}<text x="${
-      legendX + 73
-    }" y="${height - 12}">多</text></g>`,
+    `<g fill="#86868B" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue','Noto Sans SC',sans-serif" font-size="10" font-weight="500"><text x="${
+      legendX - 25
+    }" y="${legendY + 10}">少</text>${legend}<text x="${
+      legendX + 79
+    }" y="${legendY + 10}">多</text></g>`,
     "</svg>",
     "",
   ].join("\n");

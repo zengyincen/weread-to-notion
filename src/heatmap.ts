@@ -42,12 +42,12 @@ async function main(): Promise<void> {
     year,
     title: `${displayName} · 阅读热力图`,
     theme: {
-      background: normalizeColor(process.env.HEATMAP_BACKGROUND_COLOR, "#FFFFFF"),
-      empty: normalizeColor(process.env.HEATMAP_EMPTY_COLOR, "#EBEDF0"),
-      low: normalizeColor(process.env.HEATMAP_LOW_COLOR, "#ACE7AE"),
-      medium: normalizeColor(process.env.HEATMAP_MEDIUM_COLOR, "#69C16E"),
-      high: normalizeColor(process.env.HEATMAP_HIGH_COLOR, "#549F57"),
-      text: normalizeColor(process.env.HEATMAP_TEXT_COLOR, "#24292F"),
+      background: normalizeColor(process.env.HEATMAP_BACKGROUND_COLOR, "#F5F5F7"),
+      empty: normalizeColor(process.env.HEATMAP_EMPTY_COLOR, "#E5E5EA"),
+      low: normalizeColor(process.env.HEATMAP_LOW_COLOR, "#D1F2D8"),
+      medium: normalizeColor(process.env.HEATMAP_MEDIUM_COLOR, "#7EDC8F"),
+      high: normalizeColor(process.env.HEATMAP_HIGH_COLOR, "#34C759"),
+      text: normalizeColor(process.env.HEATMAP_TEXT_COLOR, "#1D1D1F"),
     },
   });
 
