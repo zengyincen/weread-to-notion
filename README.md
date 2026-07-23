@@ -27,6 +27,8 @@
   <a href="#faq">常见问题</a>
 </p>
 
+---
+
 ## 这是什么
 
 <p align="center">
