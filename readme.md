@@ -39,7 +39,7 @@ heatmap/weread.svg
 
 - `WEREAD_API_KEY`（推荐）：在 https://weread.qq.com/r/weread-skills 获取。
 - `WEREAD_COOKIE`（兼容）：未配置 API Key 时，脚本会用已有 Cookie 自动获取。
-- `HEATMAP_BLOCK_ID`：Notion 中现有 image 或 embed 块的 ID。
+- `HEATMAP_BLOCK_ID`：可直接填写 Notion 页面 ID；脚本会自动查找或创建热力图图片块。也兼容填写现有 image/embed 块 ID。
 - `NOTION_INTEGRATIONS`：沿用本项目已有的 Notion Integration Token。
 
 `HEATMAP_BLOCK_ID` 未配置时，工作流仍会生成并提交 SVG，只跳过 Notion 更新。
