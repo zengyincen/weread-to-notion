@@ -46,7 +46,6 @@ function updateMediaBlock(block, heatmapUrl, headers) {
         if (block.type === "image") {
             body = {
                 image: {
-                    type: "external",
                     external: { url: heatmapUrl },
                     caption: ((_a = block.image) === null || _a === void 0 ? void 0 : _a.caption) || [],
                 },

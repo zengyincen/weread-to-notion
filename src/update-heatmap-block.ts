@@ -56,7 +56,6 @@ async function updateMediaBlock(
   if (block.type === "image") {
     body = {
       image: {
-        type: "external",
         external: { url: heatmapUrl },
         caption: block.image?.caption || [],
       },
