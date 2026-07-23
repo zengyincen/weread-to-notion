@@ -1,12 +1,10 @@
 <p align="center">
   <img src="./assets/icon.svg" alt="WeRead to Notion icon" width="88" height="88" />
 </p>
-
+<h1 align="center">WeRead to Notion</h1>
 <p align="center">
   <img src="./assets/banner.svg" alt="WeRead to Notion" width="100%" />
 </p>
-
-<h1 align="center">WeRead to Notion</h1>
 
 <p align="center">
   自动把微信读书中的书籍、划线、想法、阅读进度与阅读时长同步到 Notion，<br />
