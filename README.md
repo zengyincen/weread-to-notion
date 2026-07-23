@@ -1,8 +1,4 @@
 <p align="center">
-  <img src="./assets/banner.svg" alt="WeRead to Notion" width="100%" />
-</p>
-
-<p align="center">
   <img src="./assets/icon.svg" alt="WeRead to Notion icon" width="88" height="88" />
 </p>
 
@@ -31,7 +27,9 @@
   <a href="#faq">常见问题</a>
 </p>
 
----
+<p align="center">
+  <img src="./assets/banner.svg" alt="WeRead to Notion" width="100%" />
+</p>
 
 ## 这是什么
 
