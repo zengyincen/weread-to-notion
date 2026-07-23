@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="WeRead to Notion icon">
+  <defs>
+    <linearGradient id="icon-bg" x1="28" y1="20" x2="224" y2="238" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F1F1F6"/>
+    </linearGradient>
+    <linearGradient id="page-green" x1="66" y1="58" x2="129" y2="188" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5FE174"/>
+      <stop offset="1" stop-color="#25B84A"/>
+    </linearGradient>
+    <filter id="icon-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000000" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="56" fill="url(#icon-bg)" stroke="#E3E3E8"/>
+  <g filter="url(#icon-shadow)">
+    <path d="M54 70c0-9.94 8.06-18 18-18h43c8.28 0 15 6.72 15 15v123c-13.67-8.89-28.17-13.33-43.5-13.33H72c-9.94 0-18-8.06-18-18V70Z" fill="url(#page-green)"/>
+    <path d="M202 70c0-9.94-8.06-18-18-18h-43c-8.28 0-15 6.72-15 15v123c13.67-8.89 28.17-13.33 43.5-13.33H184c9.94 0 18-8.06 18-18V70Z" fill="#FFFFFF"/>
+    <path d="M126 68v122" stroke="#D7D7DC" stroke-width="4" stroke-linecap="round"/>
+    <path d="M75 83h32M75 101h32M75 119h23" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" opacity=".88"/>
+    <rect x="147" y="80" width="32" height="32" rx="8" fill="#1D1D1F"/>
+    <path d="M155 103V89h4.1l8.9 13.2V89h4v14h-4.1L159 89.8V103h-4Z" fill="#FFFFFF"/>
+    <rect x="147" y="125" width="34" height="7" rx="3.5" fill="#D1D1D6"/>
+    <rect x="147" y="141" width="27" height="7" rx="3.5" fill="#D1D1D6"/>
+  </g>
+  <circle cx="202" cy="55" r="18" fill="#0A84FF" stroke="#FFFFFF" stroke-width="5"/>
+  <path d="m195 55 5 5 10-11" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

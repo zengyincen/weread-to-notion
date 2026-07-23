@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="760" viewBox="0 0 1440 760" role="img" aria-label="WeRead to Notion workflow hero">
+  <defs>
+    <linearGradient id="hero-bg" x1="0" y1="0" x2="1440" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5F5F7"/>
+      <stop offset="1" stop-color="#EDF5FF"/>
+    </linearGradient>
+    <linearGradient id="hero-green" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#69EA7E"/>
+      <stop offset="1" stop-color="#2CBF50"/>
+    </linearGradient>
+    <filter id="hero-shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="26" flood-color="#1D1D1F" flood-opacity=".12"/>
+    </filter>
+  </defs>
+  <rect width="1440" height="760" rx="36" fill="url(#hero-bg)"/>
+  <circle cx="140" cy="120" r="170" fill="#DFF8E4"/>
+  <circle cx="1290" cy="642" r="250" fill="#DCEBFF"/>
+
+  <text x="720" y="86" text-anchor="middle" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue','Noto Sans SC',sans-serif" font-size="42" font-weight="700" letter-spacing="-1.2">从阅读现场，到知识系统</text>
+  <text x="720" y="126" text-anchor="middle" fill="#6E6E73" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue','Noto Sans SC',sans-serif" font-size="21">GitHub Actions 自动搬运，Notion 持续生长</text>
+
+  <g transform="translate(80 184)" filter="url(#hero-shadow)">
+    <rect width="390" height="470" rx="32" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <rect x="26" y="25" width="54" height="54" rx="16" fill="url(#hero-green)"/>
+    <path d="M40 43h27M40 54h21M40 65h16" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+    <text x="98" y="48" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Noto Sans SC',sans-serif" font-size="25" font-weight="650">微信读书</text>
+    <text x="98" y="72" fill="#86868B" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Noto Sans SC',sans-serif" font-size="15">阅读数据源</text>
+    <g transform="translate(26 112)">
+      <rect width="338" height="94" rx="20" fill="#F7F7F9"/>
+      <rect x="16" y="16" width="46" height="62" rx="8" fill="#34C759"/>
+      <rect x="78" y="20" width="142" height="11" rx="5.5" fill="#2C2C2E"/>
+      <rect x="78" y="44" width="220" height="8" rx="4" fill="#C7C7CC"/>
+      <rect x="78" y="62" width="166" height="8" rx="4" fill="#D7D7DC"/>
+      <circle cx="315" cy="27" r="8" fill="#34C759"/>
+    </g>
+    <g transform="translate(26 222)">
+      <rect width="338" height="94" rx="20" fill="#F7F7F9"/>
+      <rect x="16" y="16" width="46" height="62" rx="8" fill="#FF9F0A"/>
+      <rect x="78" y="20" width="170" height="11" rx="5.5" fill="#2C2C2E"/>
+      <rect x="78" y="44" width="206" height="8" rx="4" fill="#C7C7CC"/>
+      <rect x="78" y="62" width="130" height="8" rx="4" fill="#D7D7DC"/>
+      <circle cx="315" cy="27" r="8" fill="#0A84FF"/>
+    </g>
+    <g transform="translate(26 343)">
+      <rect width="338" height="95" rx="20" fill="#1D1D1F"/>
+      <text x="20" y="33" fill="#FFFFFF" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Noto Sans SC',sans-serif" font-size="16" font-weight="600">今天的阅读</text>
+      <text x="20" y="68" fill="#FFFFFF" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Noto Sans SC',sans-serif" font-size="28" font-weight="700">1 小时 26 分钟</text>
+      <rect x="261" y="25" width="57" height="45" rx="14" fill="#34C759"/>
+      <path d="M276 53h7V40h7v13h7V33h7v20" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <g transform="translate(540 308)">
+    <rect width="360" height="132" rx="66" fill="#FFFFFF" stroke="#DFDFE5" filter="url(#hero-shadow)"/>
+    <circle cx="72" cy="66" r="38" fill="#1D1D1F"/>
+    <path d="M55 67h32m-9-12 12 12-12 12" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="128" y="58" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Noto Sans SC',sans-serif" font-size="23" font-weight="650">GitHub Actions</text>
+    <text x="128" y="86" fill="#86868B" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Noto Sans SC',sans-serif" font-size="16">定时 · 增量 · 可追溯</text>
+  </g>
+  <path d="M472 374h64M904 374h64" stroke="#AFAFB6" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 12"/>
+
+  <g transform="translate(970 184)" filter="url(#hero-shadow)">
+    <rect width="390" height="470" rx="32" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <rect x="26" y="25" width="54" height="54" rx="16" fill="#1D1D1F"/>
+    <text x="53" y="62" text-anchor="middle" fill="#FFFFFF" font-family="Georgia,serif" font-size="29" font-weight="700">N</text>
+    <text x="98" y="48" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Noto Sans SC',sans-serif" font-size="25" font-weight="650">Notion 图书馆</text>
+    <text x="98" y="72" fill="#86868B" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Noto Sans SC',sans-serif" font-size="15">结构化知识库</text>
+    <g transform="translate(26 112)">
+      <rect width="338" height="158" rx="20" fill="#F7F7F9"/>
+      <text x="18" y="32" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Noto Sans SC',sans-serif" font-size="15" font-weight="650">我的图书馆</text>
+      <g transform="translate(18 50)">
+        <rect width="72" height="88" rx="10" fill="#34C759"/>
+        <rect x="84" width="72" height="88" rx="10" fill="#FF9F0A"/>
+        <rect x="168" width="72" height="88" rx="10" fill="#0A84FF"/>
+        <rect x="252" width="50" height="88" rx="10" fill="#BF5AF2"/>
+        <path d="M15 22h41M15 39h31M99 22h41M99 39h27M183 22h41M183 39h33M267 22h25" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity=".88"/>
+      </g>
+    </g>
+    <g transform="translate(26 287)">
+      <rect width="338" height="151" rx="20" fill="#F7F7F9"/>
+      <text x="18" y="30" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Noto Sans SC',sans-serif" font-size="15" font-weight="650">阅读热力图</text>
+      <g transform="translate(18 50)" fill="#E5E5EA">
+        <rect width="14" height="14" rx="4"/><rect x="22" width="14" height="14" rx="4"/><rect x="44" width="14" height="14" rx="4"/><rect x="66" width="14" height="14" rx="4"/><rect x="88" width="14" height="14" rx="4"/><rect x="110" width="14" height="14" rx="4"/><rect x="132" width="14" height="14" rx="4"/><rect x="154" width="14" height="14" rx="4"/><rect x="176" width="14" height="14" rx="4"/><rect x="198" width="14" height="14" rx="4"/><rect x="220" width="14" height="14" rx="4"/><rect x="242" width="14" height="14" rx="4"/><rect x="264" width="14" height="14" rx="4"/><rect x="286" width="14" height="14" rx="4"/>
+        <rect y="24" width="14" height="14" rx="4"/><rect x="22" y="24" width="14" height="14" rx="4" fill="#34C759"/><rect x="44" y="24" width="14" height="14" rx="4"/><rect x="66" y="24" width="14" height="14" rx="4" fill="#7EDC8F"/><rect x="88" y="24" width="14" height="14" rx="4"/><rect x="110" y="24" width="14" height="14" rx="4"/><rect x="132" y="24" width="14" height="14" rx="4" fill="#34C759"/><rect x="154" y="24" width="14" height="14" rx="4"/><rect x="176" y="24" width="14" height="14" rx="4"/><rect x="198" y="24" width="14" height="14" rx="4" fill="#7EDC8F"/><rect x="220" y="24" width="14" height="14" rx="4"/><rect x="242" y="24" width="14" height="14" rx="4"/><rect x="264" y="24" width="14" height="14" rx="4" fill="#34C759"/><rect x="286" y="24" width="14" height="14" rx="4"/>
+        <rect y="48" width="14" height="14" rx="4" fill="#D1F2D8"/><rect x="22" y="48" width="14" height="14" rx="4"/><rect x="44" y="48" width="14" height="14" rx="4"/><rect x="66" y="48" width="14" height="14" rx="4"/><rect x="88" y="48" width="14" height="14" rx="4" fill="#34C759"/><rect x="110" y="48" width="14" height="14" rx="4"/><rect x="132" y="48" width="14" height="14" rx="4"/><rect x="154" y="48" width="14" height="14" rx="4" fill="#7EDC8F"/><rect x="176" y="48" width="14" height="14" rx="4"/><rect x="198" y="48" width="14" height="14" rx="4"/><rect x="220" y="48" width="14" height="14" rx="4"/><rect x="242" y="48" width="14" height="14" rx="4" fill="#34C759"/><rect x="264" y="48" width="14" height="14" rx="4"/><rect x="286" y="48" width="14" height="14" rx="4"/>
+      </g>
+    </g>
+  </g>
+</svg>
