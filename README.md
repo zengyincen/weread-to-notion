@@ -35,7 +35,7 @@
 
 微信读书很适合阅读，Notion 很适合整理。这个项目用 GitHub Actions 把两者连接起来：微信读书负责产生阅读记录，GitHub Actions 定时同步，Notion 则成为长期积累的知识库。
 
-本项目基于 [sailor0913/weread-to-notion](https://github.com/sailor0913/weread-to-notion) 持续扩展，在原有书籍、划线与想法同步能力之外，增加了更完整的元数据、增量同步状态、用户导入书籍封面处理，以及可自动嵌入 Notion 的 Apple 风格阅读热力图。
+本项目基于 [sailor0913/weread-to-notion](https://github.com/sailor0913/weread-to-notion) 持续扩展，在原有书籍、划线与想法同步能力之外，增加了更完整的元数据、增量同步状态、用户导入书籍封面处理，以及可通过固定链接嵌入 Notion 的 Apple 风格阅读热力图。
 
 <p align="center">
   <img src="./assets/hero.svg" alt="微信读书经 GitHub Actions 同步到 Notion" width="100%" />
@@ -51,7 +51,7 @@
 | 🧩 按章节整理 | 可选择按章节组织划线与想法，长书笔记更清晰 |
 | 🎯 条件过滤 | 可按“已读 / 在读 / 未读”和作者组合筛选同步范围 |
 | ⚡ 增量同步 | 保存每本书的同步水位，只处理新增或变化的数据 |
-| 🗺️ 阅读热力图 | 生成固定文件 `heatmap/weread.svg`，并自动创建或更新 Notion 图片块 |
+| 🗺️ 阅读热力图 | 生成并提交固定文件 `heatmap/weread.svg`，在 Notion 中嵌入一次固定链接即可持续显示 |
 | 🎨 Apple 风格 | 热力图采用 SF 字体栈、圆角卡片、Apple Green 色阶与宽松行距 |
 | 🖼️ 封面回退 | 用户导入书籍可选用 GitHub / Imgur 图床，并支持 Google Books、Open Library 回退 |
 | 🤖 自动运行 | 图书馆与热力图使用独立 GitHub Actions，均支持定时和手动触发 |
@@ -75,7 +75,8 @@ flowchart LR
     B --> C[Notion 图书数据库]
     B --> D[书籍页面<br/>划线与想法]
     B --> E[heatmap/weread.svg]
-    E --> F[Notion 热力图页面]
+    E --> F[固定图片链接]
+    F --> H[Notion 外链图片]
     G[data 分支<br/>增量同步状态] <--> B
 ```
 
@@ -84,7 +85,7 @@ flowchart LR
 | 工作流 | 文件 | 默认计划 | 用途 |
 | --- | --- | --- | --- |
 | WeRead to Notion Sync | `.github/workflows/sync.yml` | `0 8 * * *` | 同步书籍、元数据、划线、想法和阅读进度 |
-| Read time sync | `.github/workflows/read-time-sync.yml` | `0 0 * * *` | 每天北京时间 08:00 生成热力图、提交 SVG 并更新 Notion 图片 |
+| Read time sync | `.github/workflows/read-time-sync.yml` | `0 0 * * *` | 每天北京时间 08:00 生成热力图并提交固定 SVG 文件 |
 
 > [!NOTE]
 > GitHub Actions 的 cron 使用 UTC。`Read time sync` 的 `0 0 * * *` 对应北京时间 08:00；定时任务可能有数分钟延迟。
@@ -147,7 +148,7 @@ Read and write permissions
 然后点击 **Save**。热力图工作流需要提交 `heatmap/weread.svg`，图书馆同步工作流需要维护 `data` 分支，因此不能只授予只读权限。
 
 > [!IMPORTANT]
-> Notion 通过公开的 `raw.githubusercontent.com` 地址读取热力图。若仓库是私有仓库，SVG 可以生成，但 Notion 无法直接加载该图片。希望自动嵌入 Notion 时，请保持 Fork 为公开仓库。
+> Notion 通过公开的 `raw.githubusercontent.com` 地址读取热力图。若仓库是私有仓库，SVG 可以生成，但 Notion 无法读取该链接。需要在 Notion 展示热力图时，请保持 Fork 为公开仓库。
 
 ---
 
@@ -195,7 +196,6 @@ NOTION_INTEGRATIONS
 
 - 图书数据库所在页面
 - 同步配置数据库所在页面（如果使用筛选功能）
-- 准备用来展示热力图的页面
 
 如果 Actions 日志出现 `object_not_found`、`Could not find database` 或 404，通常不是 ID 错误，而是页面没有共享给 Integration。
 
@@ -236,28 +236,29 @@ CONFIG_DATABASE_ID
 
 不配置该值时，程序会同步所有书籍，并使用默认的增量模式。
 
-### 6. 获取 `HEATMAP_BLOCK_ID`
+### 6. 在 Notion 嵌入热力图图片链接
 
-最简单的方式是直接填写“准备展示热力图的 Notion 页面 ID”：
-
-1. 新建或打开一个 Notion 页面，例如“阅读数据”。
-2. 将页面共享给同一个 Integration。
-3. 点击 **Share → Copy link / 复制链接**。
-4. 提取链接中的 32 位页面 ID。
-
-保存为：
+先运行一次 `Read time sync`，确认仓库中已经生成 `heatmap/weread.svg`。然后拼出固定链接：
 
 ```text
-HEATMAP_BLOCK_ID
+https://raw.githubusercontent.com/<你的 GitHub 用户名>/<你的仓库名>/main/heatmap/weread.svg
 ```
 
-脚本支持三种目标：
+本仓库对应的链接是：
 
-- 页面 ID（Notion API 返回 `child_page`）：自动查找热力图，没有就创建图片块。
-- image 块 ID：直接更新现有图片块。
-- embed 块 ID：直接更新现有嵌入块。
+```text
+https://raw.githubusercontent.com/zengyincen/Weread-to-Notion/main/heatmap/weread.svg
+```
 
-推荐填写页面 ID，不需要手动创建图片块。
+在 Notion 中：
+
+1. 新建或打开准备展示热力图的页面。
+2. 输入 `/image`，选择 **Image / 图片**。
+3. 切换到 **Embed link / 嵌入链接**，粘贴上面的固定链接并确认。
+4. 按需要拖动边缘调整显示宽度。
+
+> [!IMPORTANT]
+> 请使用 `/image` → **Embed link / 嵌入链接**，不要使用 `/embed`，也不要上传 SVG。GitHub Raw 禁止 iframe，使用 `/embed` 可能显示空白。热力图工作流不会通过 Notion API 写入图片块；它只更新仓库中的同名 SVG，因此不需要 `HEATMAP_BLOCK_ID`，展示页面也不需要共享给 Integration。
 
 ### 7. 图书数据库属性
 
@@ -358,8 +359,8 @@ Settings → Secrets and variables → Actions → Secrets
 | Secret | 是否必填 | 用途 |
 | --- | --- | --- |
 | `WEREAD_API_KEY` | 推荐 | 微信读书官方 API Key，格式 `wrk-...` |
-| `HEATMAP_BLOCK_ID` | 嵌入 Notion 时必填 | Notion 页面、image 块或 embed 块 ID |
-| `NOTION_TOKEN` | 否 | `NOTION_INTEGRATIONS` 的兼容别名；已有前者无需配置 |
+
+热力图不再需要任何 Notion Secret，也不会通过 API 写入 Notion。
 
 ### 用户导入书籍封面 Secrets
 
@@ -438,13 +439,12 @@ WeRead to Notion Sync → Run workflow → Run workflow
 Read time sync → Run workflow → Run workflow
 ```
 
-成功后会完成三件事：
+成功后会完成两件事：
 
 1. 获取当年的每日阅读时长。
 2. 生成并提交固定文件 `heatmap/weread.svg`。
-3. 在 `HEATMAP_BLOCK_ID` 指定的 Notion 页面中创建或更新热力图。
 
-如果没有设置 `HEATMAP_BLOCK_ID`，前两步仍会执行，只会跳过 Notion 更新。
+Notion 中只需按照“在 Notion 嵌入热力图图片链接”一节设置一次外链图片。工作流不会调用 Notion API。
 
 ---
 
@@ -502,7 +502,7 @@ Read time sync → Run workflow → Run workflow
 - 时区：按 Asia/Shanghai 归一化每日数据。
 - 更新频率：默认每天北京时间 08:00 运行一次。
 
-### Notion 缓存处理
+### 固定链接同步
 
 仓库中的文件名始终保持：
 
@@ -510,15 +510,13 @@ Read time sync → Run workflow → Run workflow
 heatmap/weread.svg
 ```
 
-每次 Actions 提交后，Notion 图片 URL 使用对应提交 SHA。这样既不改变文件名，也能绕过 Notion 对旧图片 URL 的缓存。
+Notion 外链图片使用 `main` 分支上的固定 URL。GitHub Actions 更新同名文件后，链接本身不变，也不会向 Notion 页面写入任何内容：
 
-### 页面与图片块复用
+```text
+https://raw.githubusercontent.com/<你的 GitHub 用户名>/<你的仓库名>/main/heatmap/weread.svg
+```
 
-当 `HEATMAP_BLOCK_ID` 是页面 ID 时：
-
-1. 第一次运行会在页面末尾创建一个外链图片块。
-2. 后续运行会根据 `/heatmap/weread.svg` 路径找到同一图片块。
-3. 更新现有图片，不会每次重复插入。
+如果 Notion 客户端暂时显示旧图，刷新页面或重新打开即可。GitHub 与 Notion 的缓存可能导致几分钟延迟。
 
 ---
 
@@ -560,13 +558,6 @@ npm run build
 npx ts-node src/index.ts --bookId=你的书籍ID
 ```
 
-本地更新 Notion 热力图时还需要提供公开图片 URL：
-
-```bash
-HEATMAP_URL="https://raw.githubusercontent.com/owner/repo/main/heatmap/weread.svg" \
-npm run heatmap:notion
-```
-
 ---
 
 <a id="faq"></a>
@@ -598,13 +589,11 @@ npm run heatmap:notion
 检查：
 
 - 仓库是否公开。
-- `HEATMAP_BLOCK_ID` 是否是正确页面 / 图片块 ID。
-- 热力图页面是否共享给 Integration。
-- `NOTION_INTEGRATIONS` 是否有插入和更新内容的权限。
+- 链接是否指向你自己的仓库、`main` 分支和 `heatmap/weread.svg`。
+- 是否在 Notion 使用 `/image` → **Embed link / 嵌入链接**，而不是 `/embed` 或上传文件。
+- 浏览器能否直接打开该链接并看到 SVG。
 
-### `HEATMAP_BLOCK_ID` 显示为 `child_page`
-
-这是正常的页面类型。当前脚本支持页面 ID，会自动创建并复用热力图图片块，不需要换成图片块 ID。
+热力图不需要 `HEATMAP_BLOCK_ID`，也不需要把展示页面共享给 Integration。如果刚运行完工作流，可以刷新 Notion 页面或等待几分钟让缓存更新。
 
 ### GitHub 无法提交 `heatmap/weread.svg` 或 `data` 分支
 

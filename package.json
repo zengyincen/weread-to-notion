@@ -7,7 +7,6 @@
     "sync": "ts-node src/index.ts --all",
     "sync:full": "ts-node src/index.ts --all --full-sync",
     "heatmap": "ts-node src/heatmap.ts",
-    "heatmap:notion": "ts-node src/update-heatmap-block.ts",
     "test:heatmap": "ts-node src/core/heatmap.test.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",

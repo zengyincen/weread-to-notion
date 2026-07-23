@@ -20,9 +20,6 @@ jobs:
     env:
       WEREAD_COOKIE: ${{ secrets.WEREAD_COOKIE }}
       WEREAD_API_KEY: ${{ secrets.WEREAD_API_KEY }}
-      NOTION_INTEGRATIONS: ${{ secrets.NOTION_INTEGRATIONS || secrets.NOTION_TOKEN }}
-      NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
-      HEATMAP_BLOCK_ID: ${{ secrets.HEATMAP_BLOCK_ID }}
       YEAR: ${{ vars.YEAR }}
       HEATMAP_NAME: ${{ vars.HEATMAP_NAME || secrets.NAME }}
       HEATMAP_BACKGROUND_COLOR: ${{ vars.HEATMAP_BACKGROUND_COLOR || vars.background_color }}
@@ -49,7 +46,6 @@ jobs:
         run: npm run heatmap
 
       - name: Commit heatmap
-        id: commit_heatmap
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -61,11 +57,3 @@ jobs:
             git commit -m "更新微信读书热力图 [skip ci]"
             git push
           fi
-
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Update Notion heatmap block
-        if: env.NOTION_INTEGRATIONS != '' && env.HEATMAP_BLOCK_ID != ''
-        env:
-          HEATMAP_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ steps.commit_heatmap.outputs.sha }}/heatmap/weread.svg
-        run: npm run heatmap:notion
