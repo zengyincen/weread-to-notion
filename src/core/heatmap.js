@@ -246,12 +246,10 @@ function renderHeatmapSvg(dailyReadTimes, options) {
         .join("");
     return [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title description">`,
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title description" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">`,
         `<title id="title">${escapeXml(title)}</title>`,
         `<desc id="description">${year} 年阅读时长热力图，共 ${activeDays} 个阅读日，累计 ${escapeXml(formatDuration(totalSeconds))}</desc>`,
-        '<defs><filter id="card-shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/></filter></defs>',
-        `<rect width="100%" height="100%" rx="24" fill="${theme.background}"/>`,
-        `<rect x="10" y="10" width="${width - 20}" height="${height - 20}" rx="20" fill="#FFFFFF" stroke="#E8E8ED" stroke-width="1" filter="url(#card-shadow)"/>`,
+        `<rect width="${width}" height="${height}" rx="20" fill="${theme.background}"/>`,
         `<g fill="${theme.text}" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue','Noto Sans SC',sans-serif">`,
         `<text x="30" y="40" font-size="20" font-weight="600" letter-spacing="-0.35">${escapeXml(title)}</text>`,
         `<text x="30" y="62" font-size="12" fill="#6E6E73">${activeDays} 个阅读日 · 累计 ${escapeXml(formatDuration(totalSeconds))}</text>`,

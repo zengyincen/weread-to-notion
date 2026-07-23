@@ -1,14 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-label="WeRead to Notion banner">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-label="WeRead to Notion banner" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
   <defs>
     <linearGradient id="banner-bg" x1="80" y1="0" x2="1510" y2="520" gradientUnits="userSpaceOnUse">
       <stop stop-color="#F8F8FA"/>
       <stop offset=".52" stop-color="#F3F7F4"/>
       <stop offset="1" stop-color="#EEF4FF"/>
     </linearGradient>
-    <linearGradient id="banner-green" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#63E677"/>
-      <stop offset="1" stop-color="#28BC4D"/>
+    <linearGradient id="banner-icon-bg" x1="28" y1="20" x2="224" y2="238" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F1F1F6"/>
     </linearGradient>
+    <linearGradient id="banner-page-green" x1="66" y1="58" x2="129" y2="188" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5FE174"/>
+      <stop offset="1" stop-color="#25B84A"/>
+    </linearGradient>
+    <filter id="banner-icon-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000000" flood-opacity="0.14"/>
+    </filter>
     <filter id="banner-shadow" x="-30%" y="-30%" width="160%" height="180%">
       <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#1D1D1F" flood-opacity=".12"/>
     </filter>
@@ -21,12 +28,21 @@
   <circle cx="1412" cy="76" r="210" fill="#D8E9FF" opacity=".55"/>
   <circle cx="1328" cy="436" r="230" fill="#DDF6E2" opacity=".7"/>
 
-  <g transform="translate(112 102)">
-    <rect width="84" height="84" rx="24" fill="#FFFFFF" stroke="#E2E2E7"/>
-    <path d="M19 25c0-5.52 4.48-10 10-10h15c4.42 0 8 3.58 8 8v42c-7.7-4.57-15.7-6.86-24-6.86-4.97 0-9-4.03-9-9V25Z" fill="url(#banner-green)"/>
-    <path d="M65 25c0-5.52-4.48-10-10-10h-3v50c5.35-4.57 10.68-6.86 16-6.86V28c0-1.66-1.34-3-3-3Z" fill="#1D1D1F"/>
+  <g transform="translate(112 102) scale(.328125)">
+    <rect x="16" y="16" width="224" height="224" rx="56" fill="url(#banner-icon-bg)" stroke="#E3E3E8"/>
+    <g filter="url(#banner-icon-shadow)">
+      <path d="M54 70c0-9.94 8.06-18 18-18h43c8.28 0 15 6.72 15 15v123c-13.67-8.89-28.17-13.33-43.5-13.33H72c-9.94 0-18-8.06-18-18V70Z" fill="url(#banner-page-green)"/>
+      <path d="M202 70c0-9.94-8.06-18-18-18h-43c-8.28 0-15 6.72-15 15v123c13.67-8.89 28.17-13.33 43.5-13.33H184c9.94 0 18-8.06 18-18V70Z" fill="#FFFFFF"/>
+      <path d="M126 68v122" stroke="#D7D7DC" stroke-width="4" stroke-linecap="round"/>
+      <path d="M75 83h32M75 101h32M75 119h23" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" opacity=".88"/>
+      <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z" fill="#1D1D1F" transform="translate(147 80) scale(1.333333)"/>
+      <rect x="147" y="125" width="34" height="7" rx="3.5" fill="#D1D1D6"/>
+      <rect x="147" y="141" width="27" height="7" rx="3.5" fill="#D1D1D6"/>
+    </g>
+    <circle cx="202" cy="55" r="18" fill="#0A84FF" stroke="#FFFFFF" stroke-width="5"/>
+    <path d="m195 55 5 5 10-11" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-  <text x="226" y="157" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue','Noto Sans SC',sans-serif" font-size="28" font-weight="650" letter-spacing="-.5">WECHAT READING × NOTION</text>
+  <text x="226" y="157" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue','Noto Sans SC',sans-serif" font-size="28" font-weight="650" letter-spacing="-.5">WeRead × Notion</text>
   <text x="112" y="265" fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue','Noto Sans SC',sans-serif" font-size="76" font-weight="700" letter-spacing="-2.5">WeRead to Notion</text>
   <text x="116" y="323" fill="#6E6E73" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue','Noto Sans SC',sans-serif" font-size="30" font-weight="450">把划线、想法、进度与阅读时间，沉淀成你的第二大脑</text>
   <g transform="translate(116 370)" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue','Noto Sans SC',sans-serif" font-size="20" font-weight="550">

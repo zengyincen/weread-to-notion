@@ -75,7 +75,7 @@ function main() {
             year,
             title: `${displayName} · 阅读热力图`,
             theme: {
-                background: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_BACKGROUND_COLOR, "#F5F5F7"),
+                background: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_BACKGROUND_COLOR, "#FFFFFF"),
                 empty: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_EMPTY_COLOR, "#E5E5EA"),
                 low: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_LOW_COLOR, "#D1F2D8"),
                 medium: (0, heatmap_1.normalizeColor)(process.env.HEATMAP_MEDIUM_COLOR, "#7EDC8F"),

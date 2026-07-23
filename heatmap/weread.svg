@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="885" height="274" viewBox="0 0 885 274" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="885" height="274" viewBox="0 0 885 274" role="img" aria-labelledby="title description" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
 <title id="title">微信读书 · 阅读热力图</title>
 <desc id="description">2026 年阅读时长热力图，共 9 个阅读日，累计 3 小时 45 分钟</desc>
-<defs><filter id="card-shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/></filter></defs>
-<rect width="100%" height="100%" rx="24" fill="#F5F5F7"/>
-<rect x="10" y="10" width="865" height="254" rx="20" fill="#FFFFFF" stroke="#E8E8ED" stroke-width="1" filter="url(#card-shadow)"/>
+<rect width="885" height="274" rx="20" fill="#FFFFFF"/>
 <g fill="#1D1D1F" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue','Noto Sans SC',sans-serif">
 <text x="30" y="40" font-size="20" font-weight="600" letter-spacing="-0.35">微信读书 · 阅读热力图</text>
 <text x="30" y="62" font-size="12" fill="#6E6E73">9 个阅读日 · 累计 3 小时 45 分钟</text>
