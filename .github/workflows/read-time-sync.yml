@@ -3,7 +3,8 @@ name: Read time sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */3 * * *"
+    # GitHub Actions 使用 UTC；00:00 UTC 对应北京时间 08:00。
+    - cron: "0 0 * * *"
 
 concurrency:
   group: weread-main-writes-${{ github.ref }}

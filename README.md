@@ -86,10 +86,10 @@ flowchart LR
 | 工作流 | 文件 | 默认计划 | 用途 |
 | --- | --- | --- | --- |
 | WeRead to Notion Sync | `.github/workflows/sync.yml` | `0 8 * * *` | 同步书籍、元数据、划线、想法和阅读进度 |
-| Read time sync | `.github/workflows/read-time-sync.yml` | `0 */3 * * *` | 生成阅读热力图、提交 SVG、更新 Notion 图片 |
+| Read time sync | `.github/workflows/read-time-sync.yml` | `0 0 * * *` | 每天北京时间 08:00 生成热力图、提交 SVG 并更新 Notion 图片 |
 
 > [!NOTE]
-> GitHub Actions 的 cron 使用 UTC。当前 `0 8 * * *` 对应北京时间 16:00；如果希望北京时间 08:00 运行，请改成 `0 0 * * *`。GitHub 的定时任务可能有数分钟延迟。
+> GitHub Actions 的 cron 使用 UTC。`Read time sync` 的 `0 0 * * *` 对应北京时间 08:00；定时任务可能有数分钟延迟。
 
 ---
 
@@ -502,7 +502,7 @@ Read time sync → Run workflow → Run workflow
 - 输出文件：`heatmap/weread.svg`。
 - 时间单位：微信读书返回秒，SVG 中转换为分钟 / 小时展示。
 - 时区：按 Asia/Shanghai 归一化每日数据。
-- 更新频率：默认每 3 小时运行一次。
+- 更新频率：默认每天北京时间 08:00 运行一次。
 
 ### Notion 缓存处理
 
