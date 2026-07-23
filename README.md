@@ -14,8 +14,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/zengyincen/weread-to-notion/actions/workflows/sync.yml"><img src="https://github.com/zengyincen/weread-to-notion/actions/workflows/sync.yml/badge.svg" alt="WeRead sync" /></a>
-  <a href="https://github.com/zengyincen/weread-to-notion/actions/workflows/read-time-sync.yml"><img src="https://github.com/zengyincen/weread-to-notion/actions/workflows/read-time-sync.yml/badge.svg" alt="Read time sync" /></a>
   <img src="https://img.shields.io/badge/Node.js-20-339933?logo=nodedotjs&logoColor=white" alt="Node.js 20" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5" />
   <a href="https://github.com/zengyincen/weread-to-notion/commits/main"><img src="https://img.shields.io/github/last-commit/zengyincen/weread-to-notion" alt="Last commit" /></a>
