@@ -1,15 +1,18 @@
 <p align="center">
   <img src="./assets/icon.svg" alt="WeRead to Notion icon" width="88" height="88" />
 </p>
+
 <h1 align="center">WeRead to Notion</h1>
-<p align="center">
-  <img src="./assets/banner.svg" alt="WeRead to Notion" width="100%" />
-</p>
 
 <p align="center">
   自动把微信读书中的书籍、划线、想法、阅读进度与阅读时长同步到 Notion，<br />
   持续构建一个属于自己的、可检索的数字图书馆。
 </p>
+
+<p align="center">
+  <img src="./assets/banner.svg" alt="WeRead to Notion" width="100%" />
+</p>
+
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-20-339933?logo=nodedotjs&logoColor=white" alt="Node.js 20" />
