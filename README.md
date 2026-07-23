@@ -27,13 +27,11 @@
   <a href="#faq">常见问题</a>
 </p>
 
----
+## 这是什么
 
 <p align="center">
   <img src="./assets/banner.svg" alt="WeRead to Notion" width="100%" />
 </p>
-
-## 这是什么
 
 微信读书很适合阅读，Notion 很适合整理。这个项目用 GitHub Actions 把两者连接起来：微信读书负责产生阅读记录，GitHub Actions 定时同步，Notion 则成为长期积累的知识库。
 
