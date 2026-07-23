@@ -1,0 +1,70 @@
+name: Read time sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */3 * * *"
+
+concurrency:
+  group: weread-main-writes-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Generate reading heatmap
+    runs-on: ubuntu-latest
+    env:
+      WEREAD_COOKIE: ${{ secrets.WEREAD_COOKIE }}
+      WEREAD_API_KEY: ${{ secrets.WEREAD_API_KEY }}
+      NOTION_INTEGRATIONS: ${{ secrets.NOTION_INTEGRATIONS || secrets.NOTION_TOKEN }}
+      NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
+      HEATMAP_BLOCK_ID: ${{ secrets.HEATMAP_BLOCK_ID }}
+      YEAR: ${{ vars.YEAR }}
+      HEATMAP_NAME: ${{ vars.HEATMAP_NAME || secrets.NAME }}
+      HEATMAP_BACKGROUND_COLOR: ${{ vars.HEATMAP_BACKGROUND_COLOR || vars.background_color }}
+      HEATMAP_EMPTY_COLOR: ${{ vars.HEATMAP_EMPTY_COLOR || vars.dom_color }}
+      HEATMAP_LOW_COLOR: ${{ vars.HEATMAP_LOW_COLOR || vars.track_color }}
+      HEATMAP_MEDIUM_COLOR: ${{ vars.HEATMAP_MEDIUM_COLOR || vars.special_color }}
+      HEATMAP_HIGH_COLOR: ${{ vars.HEATMAP_HIGH_COLOR || vars.special_color2 }}
+      HEATMAP_TEXT_COLOR: ${{ vars.HEATMAP_TEXT_COLOR || vars.text_color }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate heatmap/weread.svg
+        run: npm run heatmap
+
+      - name: Commit heatmap
+        id: commit_heatmap
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add heatmap/weread.svg
+
+          if git diff --cached --quiet; then
+            echo "热力图数据没有变化"
+          else
+            git commit -m "更新微信读书热力图 [skip ci]"
+            git push
+          fi
+
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Update Notion heatmap block
+        if: env.NOTION_INTEGRATIONS != '' && env.HEATMAP_BLOCK_ID != ''
+        env:
+          HEATMAP_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ steps.commit_heatmap.outputs.sha }}/heatmap/weread.svg
+        run: npm run heatmap:notion

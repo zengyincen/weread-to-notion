@@ -7,6 +7,10 @@ on:
   # 允许从Actions标签手动触发
   workflow_dispatch:
 
+concurrency:
+  group: weread-main-writes-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
