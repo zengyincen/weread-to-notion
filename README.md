@@ -10,11 +10,6 @@
 </p>
 
 <p align="center">
-  <img src="./assets/banner.svg" alt="WeRead to Notion" width="100%" />
-</p>
-
-
-<p align="center">
   <img src="https://img.shields.io/badge/Node.js-20-339933?logo=nodedotjs&logoColor=white" alt="Node.js 20" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5" />
   <a href="https://github.com/zengyincen/weread-to-notion/commits/main"><img src="https://img.shields.io/github/last-commit/zengyincen/weread-to-notion" alt="Last commit" /></a>
@@ -33,6 +28,10 @@
 </p>
 
 ---
+
+<p align="center">
+  <img src="./assets/banner.svg" alt="WeRead to Notion" width="100%" />
+</p>
 
 ## 这是什么
 
